@@ -26,80 +26,9 @@ namespace CryoDI
 		public virtual bool IsRegistered<T>(string name = null)
 		{
 			return (ResolveProvider(typeof (T), name) != null);
-		}
-
-	    public Container RegisterType<T>(string name = null, LifeTime lifeTime = LifeTime.Global) where T : new()
-	    {
-	        return RegisterProvider<T>(new ActivatorObjectProvider<T>(lifeTime), name);
-	    }
-
-	    public Container RegisterType<T>(LifeTime lifeTime) where T : class, new()
-	    {
-	        return RegisterType<T>(null, lifeTime);
-	    }
-
-	    public Container RegisterType<TBase, TDerived>(string name = null, LifeTime lifeTime = LifeTime.Global) where TDerived : TBase, new()
-		{
-			return RegisterProvider<TBase>(new ActivatorObjectProvider<TDerived>(lifeTime), name);
-		}
-
-	    public Container RegisterType<TBase, TDerived>(LifeTime lifeTime) where TDerived : TBase, new()
-	    {
-	        return RegisterType<TBase, TDerived>(null, lifeTime);
-	    }
-
-	    public Container RegisterSingleton<T>(string name = null, LifeTime lifeTime = LifeTime.Global) where T : new()
-		{
-			return RegisterProvider<T>(new SingletonProvider<T>(lifeTime), name);
-		}
-
-	    public Container RegisterSingleton<T>(LifeTime lifeTime) where T : class, new()
-	    {
-            return RegisterSingleton<T>(null, lifeTime);
-	    }
-
-	    public Container RegisterSingleton<TBase, TDerived>(string name = null, LifeTime lifeTime = LifeTime.Global) where TDerived : TBase, new()
-		{
-			return RegisterProvider<TBase>(new SingletonProvider<TDerived>(lifeTime), name);
-		}
-
-	    public Container RegisterSingleton<TBase, TDerived>(LifeTime lifeTime) where TDerived : TBase, new()
-	    {
-	        return RegisterSingleton<TBase, TDerived>(null, lifeTime);
-	    }
-
-	    public Container RegisterInstance<T>(T obj, string name = null, LifeTime lifeTime = LifeTime.Global)
-		{
-			return RegisterProvider<T>(new InstanceProvider<T>(obj, lifeTime), name);
-		}
-
-	    public Container RegisterInstance<T>(T obj, LifeTime lifeTime)
-	    {
-	        return RegisterInstance<T>(obj, null, lifeTime);
-	    }
-
-	    public Container RegisterInstance<TBase, TDerived>(TDerived obj, string name = null, LifeTime lifeTime = LifeTime.Global) where TDerived : TBase
-		{
-			return RegisterProvider<TBase>(new InstanceProvider<TDerived>(obj, lifeTime), name);
-		}
-
-	    public Container RegisterInstance<TBase, TDerived>(TDerived obj, LifeTime lifeTime) where TDerived : TBase
-	    {
-	        return RegisterInstance<TBase, TDerived>(obj, null, lifeTime);
-	    }
-#if UNITY_5_3_OR_NEWER
-	    public Container RegisterSceneObject<T>(string path, string name = null, LifeTime lifeTime = LifeTime.Global)
-		{
-			return RegisterProvider<T>(new ScenePathProvider<T>(path, lifeTime), name);
-		}
-
-	    public Container RegisterSceneObject<T>(string path, LifeTime lifeTime)
-	    {
-	        return RegisterSceneObject<T>(path, null, lifeTime);
-	    }
-#endif
-
-	    private Container RegisterProvider<T>(IObjectProvider provider, string name = null)
+		} 
+		
+	    public Container RegisterProvider<T>(IObjectProvider provider, string name = null)
 		{
 			var key = new ContainerKey(typeof (T), name);
 			_providers[key] = provider;

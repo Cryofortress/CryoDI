@@ -2,7 +2,7 @@
 
 namespace CryoDI.Providers
 {
-	internal interface IObjectProvider : IDisposable
+	public interface IObjectProvider : IDisposable
 	{
 		LifeTime LifeTime { get; }
 		object GetObject(Container container);

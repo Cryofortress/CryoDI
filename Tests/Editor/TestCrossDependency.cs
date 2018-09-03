@@ -4,82 +4,84 @@ using CryoDI;
 using UnityEngine;
 using NUnit.Framework;
 
-
-public class ClassA : IInitializable
+namespace CryoDI.Tests
 {
-	[Dependency]
-	public ClassB ClassB { get; set; }
-
-	public ClassA BackRef { get; private set; }
-
-	public bool InitializeCalled { get; private set; }
-
-	public void Initialize()
+	public class ClassA : IInitializable
 	{
-		InitializeCalled = true;
-		BackRef = ClassB.ClassA;
-	}
-}
+		[Dependency]
+		public ClassB ClassB { get; set; }
 
-public class ClassB : IInitializable
-{
-	[Dependency]
-	public ClassA ClassA { get; set; }
+		public ClassA BackRef { get; private set; }
 
-	public ClassB BackRef { get; private set; }
+		public bool InitializeCalled { get; private set; }
 
-	public bool InitializeCalled { get; private set; }
-
-	public void Initialize()
-	{
-		InitializeCalled = true;
-		BackRef = ClassA.ClassB;
-	}
-}
-
-[TestFixture]
-public class TestCrossDependency
-{
-	[Test]
-	public void RefResolved()
-	{
-	    var container = new Container();
-	    container.RegisterSingleton<ClassA>();
-		container.RegisterSingleton<ClassB>();
-
-		var a = container.Resolve<ClassA>();
-		Assert.IsNotNull(a);
-		Assert.IsNotNull(a.ClassB);
-		Assert.IsNotNull(a.ClassB.ClassA);
-		Assert.AreSame(a, a.ClassB.ClassA);
+		public void Initialize()
+		{
+			InitializeCalled = true;
+			BackRef = ClassB.ClassA;
+		}
 	}
 
-	[Test]
-	public void InitializeCalled()
+	public class ClassB : IInitializable
 	{
-		var container = new Container();
-		container.RegisterSingleton<ClassA>();
-		container.RegisterSingleton<ClassB>();
+		[Dependency]
+		public ClassA ClassA { get; set; }
 
-		var a = container.Resolve<ClassA>();
-		Assert.IsTrue(a.InitializeCalled);
-		Assert.IsTrue(a.ClassB.InitializeCalled);
+		public ClassB BackRef { get; private set; }
+
+		public bool InitializeCalled { get; private set; }
+
+		public void Initialize()
+		{
+			InitializeCalled = true;
+			BackRef = ClassA.ClassB;
+		}
 	}
 
-	[Test]
-	public void RefSet()
+	[TestFixture]
+	public class TestCrossDependency
 	{
-	    var container = new Container();
-	    container.RegisterSingleton<ClassA>();
-		container.RegisterSingleton<ClassB>();
+		[Test]
+		public void RefResolved()
+		{
+			var container = new Container();
+			container.RegisterSingleton<ClassA>();
+			container.RegisterSingleton<ClassB>();
 
-		var a = container.Resolve<ClassA>();
-		Assert.IsNotNull(a.BackRef);
-		Assert.AreSame(a, a.BackRef);
+			var a = container.Resolve<ClassA>();
+			Assert.IsNotNull(a);
+			Assert.IsNotNull(a.ClassB);
+			Assert.IsNotNull(a.ClassB.ClassA);
+			Assert.AreSame(a, a.ClassB.ClassA);
+		}
 
-		var b = a.ClassB;
-		Assert.IsNotNull(b.BackRef);
-		Assert.AreSame(b, b.BackRef);
+		[Test]
+		public void InitializeCalled()
+		{
+			var container = new Container();
+			container.RegisterSingleton<ClassA>();
+			container.RegisterSingleton<ClassB>();
+
+			var a = container.Resolve<ClassA>();
+			Assert.IsTrue(a.InitializeCalled);
+			Assert.IsTrue(a.ClassB.InitializeCalled);
+		}
+
+		[Test]
+		public void RefSet()
+		{
+			var container = new Container();
+			container.RegisterSingleton<ClassA>();
+			container.RegisterSingleton<ClassB>();
+
+			var a = container.Resolve<ClassA>();
+			Assert.IsNotNull(a.BackRef);
+			Assert.AreSame(a, a.BackRef);
+
+			var b = a.ClassB;
+			Assert.IsNotNull(b.BackRef);
+			Assert.AreSame(b, b.BackRef);
+		}
 	}
 }
 

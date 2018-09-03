@@ -9,13 +9,13 @@ namespace CryoDI
 {
     internal static class LifeTimeManager
     {
-        private class DisposablesCollection
+        private class SceneDisposables
         {
 	        private readonly List<IDisposable> _disposables = new List<IDisposable>();
 	        
             public string SceneName { get; private set; }
 
-	        public DisposablesCollection(string sceneName)
+	        public SceneDisposables(string sceneName)
 	        {
 		        SceneName = sceneName;
 	        }
@@ -34,82 +34,92 @@ namespace CryoDI
             }
         }
 
-        private static List<DisposablesCollection> _storage;
-	    private static DisposablesCollection _lastUsedColl;
+        private static List<SceneDisposables> _scenes;
+	    private static SceneDisposables _lastScene;
 	    private static readonly List<IDisposable> _global = new List<IDisposable>();
 
         public static void TryToAdd(object obj, LifeTime lifeTime)
         {
 	        if (lifeTime == LifeTime.External) return;
+	        
             var disposable = obj as IDisposable;
 	        if (disposable == null) return;
 	        
 	        if (lifeTime == LifeTime.Scene)
-		        Add(disposable);
+		        AddSceneDisposable(disposable);
 	        else
 	        	_global.Add(disposable);
         }
 
 	    public static void DisposeAll()
 	    {
-		    // среди этого списка может быть ссылка на сам контейнер. Поэтому создаем временную копию
-		    var collectionsToDispose = _storage.ToArray();
-		    _storage.Clear();
+		    // среди этих списков может быть ссылка на сам контейнер. Поэтому создаем временную копию
+		    
+		    SceneDisposables[] scenesToDispose = null;
 
-		    var objectsToDispose = _global.ToArray();
-		    _global.Clear();
-		    
-		    foreach (var collection in collectionsToDispose)
+		    if (_scenes != null)
 		    {
-			    collection.Dispose();
+			    scenesToDispose = _scenes.ToArray();
+			    _scenes.Clear();
 		    }
-		    
-		    foreach (var disposable in objectsToDispose)
+
+		    var globalsToDispose = _global.ToArray();
+		    _global.Clear();
+
+		    if (scenesToDispose != null)
+		    {
+			    foreach (var scene in scenesToDispose)
+			    {
+				    scene.Dispose();
+			    }
+		    }
+
+		    foreach (var disposable in globalsToDispose)
 		    {
 			    disposable.Dispose();
 		    }
 	    }
 
-	    private static void Add(IDisposable disposable)
+	    private static void AddSceneDisposable(IDisposable disposable)
         {
-            GetCurCollection().Add(disposable);
+            GetCurScene().Add(disposable);
         }
 
-        private static DisposablesCollection GetCurCollection()
+        private static SceneDisposables GetCurScene()
         {
-            if (_storage == null)
-		        CreateStorage();
+            if (_scenes == null)
+		        Init();
 
 	        var activeSceneName = SceneManager.GetActiveScene().name;
-	        if (_lastUsedColl != null && _lastUsedColl.SceneName == activeSceneName)
-		        return _lastUsedColl;
+	        if (_lastScene != null && _lastScene.SceneName == activeSceneName)
+		        return _lastScene;
 	        
-	        var coll = _storage.FirstOrDefault(o => o.SceneName == activeSceneName);
+	        var coll = _scenes.FirstOrDefault(o => o.SceneName == activeSceneName);
 			if (coll == null)
 			{
-				coll = new DisposablesCollection(activeSceneName);
-				_storage.Add(coll);
+				coll = new SceneDisposables(activeSceneName);
+				_scenes.Add(coll);
 			}
-	        _lastUsedColl = coll;
+	        _lastScene = coll;
             return coll;
         }
 
-	    private static void CreateStorage()
+	    private static void Init()
 	    {
-		    _storage = new List<DisposablesCollection>();
+		    _scenes = new List<SceneDisposables>();
 		    SceneManager.sceneUnloaded += OnSceneUnloaded;
 	    }
 
 	    private static void OnSceneUnloaded(Scene scene)
         {
-            var coll = _storage.FirstOrDefault(o => o.SceneName == SceneManager.GetActiveScene().name);
+            var coll = _scenes.FirstOrDefault(o => o.SceneName == SceneManager.GetActiveScene().name);
             if (coll != null)
             {
                 coll.Dispose();
-                _storage.Remove(coll);
+                _scenes.Remove(coll);
             }
-	        if (Object.ReferenceEquals(_lastUsedColl, coll))
-		        _lastUsedColl = null;
+	        if (Object.ReferenceEquals(_lastScene, coll))
+		        _lastScene = null;
         }
     }
 }
