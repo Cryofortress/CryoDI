@@ -9,16 +9,9 @@ namespace CryoDI
 	/// <summary>
 	/// Класс DI-контейнера
 	/// </summary>
-	public class Container : IDisposable
+	public class CryoContainer : IDisposable
 	{
 		private readonly Dictionary<ContainerKey, IObjectProvider> _providers = new Dictionary<ContainerKey, IObjectProvider>();
-
-		public Container()
-	    {
-#if UNITY_5_3_OR_NEWER
-	        SceneDependent.SetContainer(this);
-#endif
-	    }
 
 		/// <summary>
 		/// Проверить, зарегистрирован ли обьект в контейнере
@@ -28,7 +21,7 @@ namespace CryoDI
 			return (ResolveProvider(typeof (T), name) != null);
 		} 
 		
-	    public Container RegisterProvider<T>(IObjectProvider provider, string name = null)
+	    public CryoContainer RegisterProvider<T>(IObjectProvider provider, string name = null)
 		{
 			var key = new ContainerKey(typeof (T), name);
 			_providers[key] = provider;

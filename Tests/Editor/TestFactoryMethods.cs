@@ -32,7 +32,7 @@ namespace CryoDI.Tests
 		public void TestType()
 		{
 			_counter = 0;
-			var container = new Container();
+			var container = new CryoContainer();
 			container.RegisterType<MyClass>(CreateMyClass);
 
 			var a = container.Resolve<MyClass>();
@@ -55,7 +55,7 @@ namespace CryoDI.Tests
 		public void TestBaseType()
 		{
 			_counter = 0;
-			var container = new Container();
+			var container = new CryoContainer();
 			container.RegisterType<MyBaseClass, MyClass>(CreateMyClass);
 
 			var a = container.Resolve<MyBaseClass>();
@@ -81,7 +81,7 @@ namespace CryoDI.Tests
 		public void TestSingleton()
 		{
 			_counter = 0;
-			var container = new Container();
+			var container = new CryoContainer();
 			container.RegisterSingleton<MyClass>(CreateMyClass);
 
 			var a = container.Resolve<MyClass>();
@@ -104,7 +104,7 @@ namespace CryoDI.Tests
 		public void TestBaseSingleton()
 		{
 			_counter = 0;
-			var container = new Container();
+			var container = new CryoContainer();
 			container.RegisterSingleton<MyBaseClass, MyClass>(CreateMyClass);
 
 			var a = container.Resolve<MyBaseClass>();

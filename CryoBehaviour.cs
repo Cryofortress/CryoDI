@@ -3,15 +3,8 @@ using UnityEngine;
 
 namespace CryoDI
 {
-    public class SceneDependent : MonoBehaviour
+    public class CryoBehaviour : MonoBehaviour
     {
-	    protected static Container _container;
-
-	    public static void SetContainer(Container container)
-	    {
-		    _container = container;
-	    }
-
 	    public bool BuiltUp { get; private set; }
 
         public virtual void Awake()
@@ -24,9 +17,9 @@ namespace CryoDI
 			if (!BuiltUp)
 			{
 				BuiltUp = true;
-				_container.BuildUp(this);
+				UnityContainerBuilder.Container.BuildUp(this);
 			}
 		}
-	}
+    }
 }
 #endif

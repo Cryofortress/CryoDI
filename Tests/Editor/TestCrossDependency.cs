@@ -44,7 +44,7 @@ namespace CryoDI.Tests
 		[Test]
 		public void RefResolved()
 		{
-			var container = new Container();
+			var container = new CryoContainer();
 			container.RegisterSingleton<ClassA>();
 			container.RegisterSingleton<ClassB>();
 
@@ -58,7 +58,7 @@ namespace CryoDI.Tests
 		[Test]
 		public void InitializeCalled()
 		{
-			var container = new Container();
+			var container = new CryoContainer();
 			container.RegisterSingleton<ClassA>();
 			container.RegisterSingleton<ClassB>();
 
@@ -70,7 +70,7 @@ namespace CryoDI.Tests
 		[Test]
 		public void RefSet()
 		{
-			var container = new Container();
+			var container = new CryoContainer();
 			container.RegisterSingleton<ClassA>();
 			container.RegisterSingleton<ClassB>();
 

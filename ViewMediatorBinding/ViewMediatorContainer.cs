@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace CryoDI.ViewMediatorBinding
 {
-	public class ViewMediatorContainer : Container, IMediatorFactory
+	public class ViewMediatorContainer : CryoContainer, IMediatorFactory
 	{
 		private readonly Dictionary<Type, Type> _mediators = new Dictionary<Type, Type>();
 		private static ViewMediatorContainer _instance;

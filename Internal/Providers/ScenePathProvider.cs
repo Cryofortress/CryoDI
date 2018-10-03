@@ -19,13 +19,13 @@ namespace CryoDI.Providers
 
 		public LifeTime LifeTime { get; private set; }
 
-		public object GetObject(Container container)
+		public object GetObject(CryoContainer container)
 		{
 			if (IsDestroyed())
 			{
 				_cached = FindObject();
 
-			    var sceneDependent = _cached as SceneDependent;
+			    var sceneDependent = _cached as CryoBehaviour;
 				if (sceneDependent != null && !sceneDependent.BuiltUp)
 				{
 					sceneDependent.BuildUp();

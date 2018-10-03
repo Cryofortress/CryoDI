@@ -21,7 +21,7 @@ namespace CryoDI.Providers
 
 		public LifeTime LifeTime { get; private set; }
 
-		public object GetObject(Container container)
+		public object GetObject(CryoContainer container)
 		{
 			if (!_created)
 			{

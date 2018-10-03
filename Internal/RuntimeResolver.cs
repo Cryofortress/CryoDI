@@ -3,9 +3,9 @@
 	internal class RuntimeResolver<T> : IRuntimeResolver<T>
 	{
 		private readonly string _name;
-		private readonly Container _container;
+		private readonly CryoContainer _container;
 
-		public RuntimeResolver(string name, Container container)
+		public RuntimeResolver(string name, CryoContainer container)
 		{
 			_name = name;
 			_container = container;

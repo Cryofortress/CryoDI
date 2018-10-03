@@ -7,14 +7,14 @@ namespace CryoDI.Tests
 {
     public class LifetimeTestStarter : MonoBehaviour
     {
-        private Container _container;
+        private CryoContainer _container;
 
         public void Awake()
         {
             DontDestroyOnLoad(gameObject);
             //Assert.raiseExceptions = true;
 
-            _container = new Container();
+            _container = new CryoContainer();
             _container.RegisterSingleton<SingletonCounter>("GlobalSingleton", LifeTime.Global);
             _container.RegisterSingleton<SingletonCounter>("SceneSingleton", LifeTime.Scene);
             _container.RegisterSingleton<SingletonCounter>("ExternalSingleton", LifeTime.External);
