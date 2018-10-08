@@ -2,7 +2,7 @@
 
 namespace CryoDI
 {
-	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Constructor | AttributeTargets.Method, AllowMultiple = false)]
+	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
 	public class DependencyAttribute : Attribute
 	{
 		public DependencyAttribute() {}

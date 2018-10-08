@@ -31,6 +31,14 @@ namespace CryoDI
 				return _instance;
 			}
 		}
+
+		/// <summary>
+		/// Override this method to create container derived from CryoContainer  
+		/// </summary>
+		protected virtual CryoContainer CreateContainer()
+		{
+			return new CryoContainer();
+		}
 		
 		/// <summary>
 		/// Override this method to customize containers content
@@ -41,7 +49,7 @@ namespace CryoDI
 		
 		void IInternalContainerBuidler.CreateRootContainer()
 		{
-			_container = new CryoContainer();
+			_container = CreateContainer();
 			SetupContainer(_container);
 			CryoBehaviour.SetRootContainer(_container);
 		}

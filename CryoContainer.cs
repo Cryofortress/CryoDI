@@ -90,13 +90,13 @@ namespace CryoDI
 	    /// <summary>
 	    /// Заинжектить зависимости в уже существующий объект
 	    /// </summary>
-	    public void BuildUp(object obj)
+	    public void BuildUp(object obj, params object[] parameters)
 	    {
 		    BuildUpStack.PushObject(obj);
 
 		    try
 		    {
-			    BuildUp(obj.GetType(), obj);
+			    BuildUp(obj.GetType(), obj, parameters);
 			    PostBuildUp(obj);
 		    }
 		    finally
@@ -105,7 +105,7 @@ namespace CryoDI
 		    }
 	    }
 
-		private void BuildUp(Type type, object obj)
+		private void BuildUp(Type type, object obj, params object[] parameters)
 		{
 			if (type.BaseType != typeof(object))
 				BuildUp(type.BaseType, obj);
@@ -121,40 +121,89 @@ namespace CryoDI
 
 			foreach (MemberInfo member in members)
 			{
-				var attrs = member.GetCustomAttributes(typeof(DependencyAttribute), true);
-				if (!attrs.Any())
+				var dependencyAttr = member.GetCustomAttributes(typeof(DependencyAttribute), true).FirstOrDefault() as DependencyAttribute;
+				if (dependencyAttr != null)
+				{
+					ProcessDependency(type, obj, member, dependencyAttr.Name);
 					continue;
-				var attr = attrs.FirstOrDefault();
-
-				var attrib = (DependencyAttribute) attr;
-				var propertyInfo = (PropertyInfo) member;
-				object valueObj;
-
-				BuildUpStack.SetPropertyName(propertyInfo.Name);
-
-				try
-				{
-					var propertyType = propertyInfo.PropertyType;
-					if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(IRuntimeResolver<>))
-					{
-						valueObj = CreateRuntimeResolver(propertyType, attrib.Name);
-					}
-					else
-						valueObj = Resolve(propertyType, attrib.Name);
 				}
-				catch (ContainerException ex)
+				
+				var paramAttribute = member.GetCustomAttributes(typeof(ParamAttribute), true).FirstOrDefault() as ParamAttribute;
+				if (paramAttribute != null)
 				{
-					throw new ContainerException(ex.Message + " for " + type.FullName + "." + propertyInfo.Name);
+					ProcessParam(type, obj, member, parameters);
 				}
-				catch (Exception ex)
-				{
-					throw new ContainerException(ex.Message + " while resolving " + type.FullName + "." + propertyInfo.Name, ex);
-				}
-
-				var setter = propertyInfo.GetSetMethod(true);
-				if (setter != null)
-					setter.Invoke(obj, new object[] {valueObj});
 			}
+		}
+
+		private void ProcessParam(Type type, object obj, MemberInfo member, object[] parameters)
+		{
+			
+			var propertyInfo = (PropertyInfo) member;
+			object valueObj;
+
+			BuildUpStack.SetPropertyName(propertyInfo.Name);
+
+			try
+			{
+				var propertyType = propertyInfo.PropertyType;
+				valueObj = FindParameter(propertyType, parameters);
+			}
+			catch (ContainerException ex)
+			{
+				throw new ContainerException(ex.Message + " for " + type.FullName + ":" + propertyInfo.Name);
+			}
+			catch (Exception ex)
+			{
+				throw new ContainerException(ex.Message + " while resolving " + type.FullName + ":" + propertyInfo.Name, ex);
+			}
+
+			var setter = propertyInfo.GetSetMethod(true);
+			if (setter != null)
+				setter.Invoke(obj, new object[] {valueObj});
+		}
+
+		private object FindParameter(Type propertyType, object[] parameters)
+		{
+			foreach (var parameter in parameters)
+			{
+				if (propertyType.IsAssignableFrom(parameter.GetType()))
+					return parameter;
+			}
+
+			throw new ContainerException("Can't find assignable parameter");
+		}
+
+		private void ProcessDependency(Type type, object obj, MemberInfo member, string attribName)
+		{
+			var propertyInfo = (PropertyInfo) member;
+			object valueObj;
+
+			BuildUpStack.SetPropertyName(propertyInfo.Name);
+
+			try
+			{
+				var propertyType = propertyInfo.PropertyType;
+				
+				if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(IRuntimeResolver<>))
+				{
+					valueObj = CreateRuntimeResolver(propertyType, attribName);
+				}
+				else
+					valueObj = Resolve(propertyType, attribName);
+			}
+			catch (ContainerException ex)
+			{
+				throw new ContainerException(ex.Message + " for " + type.FullName + ":" + propertyInfo.Name);
+			}
+			catch (Exception ex)
+			{
+				throw new ContainerException(ex.Message + " while resolving " + type.FullName + ":" + propertyInfo.Name, ex);
+			}
+
+			var setter = propertyInfo.GetSetMethod(true);
+			if (setter != null)
+				setter.Invoke(obj, new object[] {valueObj});
 		}
 
 		/// <summary>
