@@ -2,7 +2,7 @@
 
 namespace CryoDI
 {
-	internal class LifeTimeStack
+	internal static class LifeTimeStack
 	{
 		private static List<Entry> _stack = new List<Entry>();
 
