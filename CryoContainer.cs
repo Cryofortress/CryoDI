@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using CryoDI.Providers;
+using UnityEngine;
 
 namespace CryoDI
 {
@@ -137,10 +138,30 @@ namespace CryoDI
 		    }
 	    }
 
-		private void BuildUp(Type type, object obj, params object[] parameters)
+		private void BuildUp(Type type, object obj, object[] parameters)
+		{
+			BuildUp(type, obj, ConvertParameters(parameters));
+		}
+
+		private Param[] ConvertParameters(object[] parameters)
+		{
+			var ret = new Param[parameters.Length];
+			for(int i = 0; i < parameters.Length; ++i)
+			{
+				var param = parameters[i] as Param;
+				if (param == null)
+					param = new Param(parameters[i]);
+				
+				ret[i] = param;
+			}
+
+			return ret;
+		}
+
+		private void BuildUp(Type type, object obj, Param[] parameters)
 		{
 			if (type.BaseType != typeof(object))
-				BuildUp(type.BaseType, obj);
+				BuildUp(type.BaseType, obj, parameters);
 			
 #if NETFX_CORE
 			IEnumerable<MemberInfo> members =
@@ -168,7 +189,7 @@ namespace CryoDI
 			}
 		}
 
-		private void ProcessParam(Type type, object obj, MemberInfo member, object[] parameters)
+		private void ProcessParam(Type type, object obj, MemberInfo member, Param[] parameters)
 		{
 			
 			var propertyInfo = (PropertyInfo) member;
@@ -178,8 +199,7 @@ namespace CryoDI
 
 			try
 			{
-				var propertyType = propertyInfo.PropertyType;
-				valueObj = FindParameter(propertyType, parameters);
+				valueObj = FindParameter(propertyInfo, parameters);
 			}
 			catch (ContainerException ex)
 			{
@@ -192,16 +212,35 @@ namespace CryoDI
 
 			var setter = propertyInfo.GetSetMethod(true);
 			if (setter != null)
-				setter.Invoke(obj, new object[] {valueObj});
+				setter.Invoke(obj, new[] {valueObj});
 		}
 
-		private object FindParameter(Type propertyType, object[] parameters)
+		private object FindParameter(PropertyInfo propertyInfo, Param[] parameters)
 		{
+			
+			var propertyName = propertyInfo.Name;
+			Type propertyType = propertyInfo.PropertyType;
+			
+			var param = parameters.FirstOrDefault(p => p.Name == propertyName);
+			if (param != null)
+			{
+				if (!propertyType.IsInstanceOfType(param.Value))
+					throw new ContainerException("Parameter value can't be assigned");
+				return param.Value;
+			}
+			
 			foreach (var parameter in parameters)
 			{
-				if (propertyType.IsAssignableFrom(parameter.GetType()))
-					return parameter;
+				if (parameter.Name == null && propertyType.IsInstanceOfType(parameter.Value))
+				{
+					if (param != null)
+						throw new ContainerException("Many assignable parameters were found");
+					param = parameter;
+				}
 			}
+			
+			if (param != null)
+				return param.Value;
 
 			throw new ContainerException("Can't find assignable parameter");
 		}
