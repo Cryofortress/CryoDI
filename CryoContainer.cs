@@ -31,15 +31,23 @@ namespace CryoDI
 		/// <summary>
 		/// Получить объект нужного типа
 		/// </summary>
-		public T Resolve<T>(string name = null)
+		public T ResolveByName<T>(string name, params object[] parameters)
 		{
-			return (T) Resolve(typeof (T), name);
+			return (T) ResolveByName(typeof (T), name, parameters);
+		}
+		
+		/// <summary>
+		/// Получить объект нужного типа
+		/// </summary>
+		public T Resolve<T>(params object[] parameters)
+		{
+			return (T) ResolveByName(typeof (T), null, parameters);
 		}
 
 		/// <summary>
 		/// Получить объект нужного типа
 		/// </summary>
-		public virtual object Resolve(Type type, string name = null)
+		public virtual object ResolveByName(Type type, string name, params object[] parameters)
 		{
 			ContainerKey key;
 			IObjectProvider provider = ResolveProvider(type, name, out key);
@@ -50,7 +58,7 @@ namespace CryoDI
 			try
 			{
 				LifeTimeStack.Push(key, provider.LifeTime);
-				return provider.GetObject(this);
+				return provider.GetObject(this, parameters);
 			}
 			finally
 			{
@@ -59,17 +67,33 @@ namespace CryoDI
 		}
 
 		/// <summary>
-		/// Попытаться получить объект нужного типа. Если объекта нет, то возвращет null не кидая исключения.
+		/// Получить объект нужного типа
 		/// </summary>
-		public virtual T TryResolve<T>(string name = null)
+		public virtual object Resolve(Type type, params object[] parameters)
 		{
-			return (T) TryResolve(typeof (T), name);
+			return ResolveByName(type, null, parameters);
 		}
 
 		/// <summary>
 		/// Попытаться получить объект нужного типа. Если объекта нет, то возвращет null не кидая исключения.
 		/// </summary>
-		public virtual object TryResolve(Type type, string name = null)
+		public virtual T TryResolveByName<T>(string name, params object[] parameters)
+		{
+			return (T) TryResolveByName(typeof (T), name, parameters);
+		}
+
+		/// <summary>
+		/// Попытаться получить объект нужного типа. Если объекта нет, то возвращет null не кидая исключения.
+		/// </summary>
+		public virtual T TryResolve<T>(params object[] parameters)
+		{
+			return (T) TryResolveByName(typeof (T), null, parameters);
+		}
+
+		/// <summary>
+		/// Попытаться получить объект нужного типа. Если объекта нет, то возвращет null не кидая исключения.
+		/// </summary>
+		public virtual object TryResolveByName(Type type, string name, params object[] parameters)
 		{
 			ContainerKey key;
 			IObjectProvider provider = ResolveProvider(type, name, out key);
@@ -79,7 +103,7 @@ namespace CryoDI
 			try
 			{
 				LifeTimeStack.Push(key, provider.LifeTime);
-				return provider.GetObject(this);
+				return provider.GetObject(this, parameters);
 			}
 			finally
 			{
@@ -87,7 +111,15 @@ namespace CryoDI
 			}
 		}
 
-	    /// <summary>
+		/// <summary>
+		/// Попытаться получить объект нужного типа. Если объекта нет, то возвращет null не кидая исключения.
+		/// </summary>
+		public virtual object TryResolve(Type type, params object[] parameters)
+		{
+			return TryResolveByName(type, null, parameters);
+		}
+
+		/// <summary>
 	    /// Заинжектить зависимости в уже существующий объект
 	    /// </summary>
 	    public void BuildUp(object obj, params object[] parameters)
@@ -190,7 +222,7 @@ namespace CryoDI
 					valueObj = CreateRuntimeResolver(propertyType, attribName);
 				}
 				else
-					valueObj = Resolve(propertyType, attribName);
+					valueObj = ResolveByName(propertyType, attribName);
 			}
 			catch (ContainerException ex)
 			{

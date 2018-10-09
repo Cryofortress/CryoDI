@@ -21,14 +21,14 @@ namespace CryoDI.Providers
 
 		public LifeTime LifeTime { get; private set; }
 
-		public object GetObject(CryoContainer container)
+		public object GetObject(CryoContainer container, params object[] parameters)
 		{
 			if (!_created)
 			{
 				_instance = _factoryMethod();
 				_created = true;
 
-			    container.BuildUp(_instance);
+			    container.BuildUp(_instance, parameters);
 			    LifeTimeManager.TryToAdd(this, LifeTime);
 			}
 			return _instance;

@@ -5,6 +5,6 @@ namespace CryoDI.Providers
 	public interface IObjectProvider : IDisposable
 	{
 		LifeTime LifeTime { get; }
-		object GetObject(CryoContainer container);
+		object GetObject(CryoContainer container, params object[] parameters);
 	}
 }

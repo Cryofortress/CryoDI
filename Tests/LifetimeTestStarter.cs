@@ -38,16 +38,16 @@ namespace CryoDI.Tests
         private void CheckSingletones1()
         {
             Debug.Log("Checking singletones #1");
-            Assert.AreEqual(1, _container.Resolve<SingletonCounter>("GlobalSingleton").InstanceId, "Wrong InstanceId of GlobalSingleton");
-            Assert.AreEqual(2, _container.Resolve<SingletonCounter>("SceneSingleton").InstanceId, "Wrong InstanceId of SceneSingleton");
-            Assert.AreEqual(3, _container.Resolve<SingletonCounter>("ExternalSingleton").InstanceId, "Wrong InstanceId of ExternalSingleton");
+            Assert.AreEqual(1, _container.ResolveByName<SingletonCounter>("GlobalSingleton").InstanceId, "Wrong InstanceId of GlobalSingleton");
+            Assert.AreEqual(2, _container.ResolveByName<SingletonCounter>("SceneSingleton").InstanceId, "Wrong InstanceId of SceneSingleton");
+            Assert.AreEqual(3, _container.ResolveByName<SingletonCounter>("ExternalSingleton").InstanceId, "Wrong InstanceId of ExternalSingleton");
             
             Assert.AreEqual(3, SingletonCounter.CreatedCount, "Wrong number of created singletones");
             Assert.AreEqual(0, SingletonCounter.DisposedCount, "Wrong number of disposed singletones");
 
-            Assert.AreEqual(1, _container.Resolve<SingletonCounter>("GlobalSingleton").InstanceId, "Wrong InstanceId of GlobalSingleton");
-            Assert.AreEqual(2, _container.Resolve<SingletonCounter>("SceneSingleton").InstanceId, "Wrong InstanceId of SceneSingleton");
-            Assert.AreEqual(3, _container.Resolve<SingletonCounter>("ExternalSingleton").InstanceId, "Wrong InstanceId of ExternalSingleton");
+            Assert.AreEqual(1, _container.ResolveByName<SingletonCounter>("GlobalSingleton").InstanceId, "Wrong InstanceId of GlobalSingleton");
+            Assert.AreEqual(2, _container.ResolveByName<SingletonCounter>("SceneSingleton").InstanceId, "Wrong InstanceId of SceneSingleton");
+            Assert.AreEqual(3, _container.ResolveByName<SingletonCounter>("ExternalSingleton").InstanceId, "Wrong InstanceId of ExternalSingleton");
                 
             Assert.AreEqual(3, SingletonCounter.CreatedCount, "Wrong number of created singletones");
             Assert.AreEqual(0, SingletonCounter.DisposedCount, "Wrong number of disposed singletones");
@@ -56,16 +56,16 @@ namespace CryoDI.Tests
         private void CheckTypes1()
         {
             Debug.Log("Checking types #1");
-            Assert.AreEqual(1, _container.Resolve<TypeCounter>("GlobalType").InstanceId);
-            Assert.AreEqual(2, _container.Resolve<TypeCounter>("SceneType").InstanceId);
-            Assert.AreEqual(3, _container.Resolve<TypeCounter>("ExternalType").InstanceId);
+            Assert.AreEqual(1, _container.ResolveByName<TypeCounter>("GlobalType").InstanceId);
+            Assert.AreEqual(2, _container.ResolveByName<TypeCounter>("SceneType").InstanceId);
+            Assert.AreEqual(3, _container.ResolveByName<TypeCounter>("ExternalType").InstanceId);
             
             Assert.AreEqual(3, TypeCounter.CreatedCount);
             Assert.AreEqual(0, TypeCounter.DisposedCount);
             
-            Assert.AreEqual(4, _container.Resolve<TypeCounter>("GlobalType").InstanceId);
-            Assert.AreEqual(5, _container.Resolve<TypeCounter>("SceneType").InstanceId);
-            Assert.AreEqual(6, _container.Resolve<TypeCounter>("ExternalType").InstanceId);
+            Assert.AreEqual(4, _container.ResolveByName<TypeCounter>("GlobalType").InstanceId);
+            Assert.AreEqual(5, _container.ResolveByName<TypeCounter>("SceneType").InstanceId);
+            Assert.AreEqual(6, _container.ResolveByName<TypeCounter>("ExternalType").InstanceId);
             
             Assert.AreEqual(6, TypeCounter.CreatedCount);
             Assert.AreEqual(0, TypeCounter.DisposedCount);
@@ -74,9 +74,9 @@ namespace CryoDI.Tests
         private void CheckInstances1()
         {
             Debug.Log("Checking instances #1");
-            Assert.AreEqual(1, _container.Resolve<InstanceCounter>("GlobalInstance").InstanceId);
-            Assert.AreEqual(2, _container.Resolve<InstanceCounter>("SceneInstance").InstanceId);
-            Assert.AreEqual(3, _container.Resolve<InstanceCounter>("ExternalInstance").InstanceId);
+            Assert.AreEqual(1, _container.ResolveByName<InstanceCounter>("GlobalInstance").InstanceId);
+            Assert.AreEqual(2, _container.ResolveByName<InstanceCounter>("SceneInstance").InstanceId);
+            Assert.AreEqual(3, _container.ResolveByName<InstanceCounter>("ExternalInstance").InstanceId);
             
             Assert.AreEqual(3, InstanceCounter.CreatedCount);
             Assert.AreEqual(0, InstanceCounter.DisposedCount);
@@ -98,9 +98,9 @@ namespace CryoDI.Tests
         {
             Debug.Log("Checking singletones #2");
 
-            Assert.AreEqual(1, _container.Resolve<SingletonCounter>("GlobalSingleton").InstanceId, "Wrong InstanceId of GlobalSingleton");
-            Assert.AreEqual(4, _container.Resolve<SingletonCounter>("SceneSingleton").InstanceId, "Wrong InstanceId of SceneSingleton");
-            Assert.AreEqual(3, _container.Resolve<SingletonCounter>("ExternalSingleton").InstanceId, "Wrong InstanceId of ExternalSingleton");
+            Assert.AreEqual(1, _container.ResolveByName<SingletonCounter>("GlobalSingleton").InstanceId, "Wrong InstanceId of GlobalSingleton");
+            Assert.AreEqual(4, _container.ResolveByName<SingletonCounter>("SceneSingleton").InstanceId, "Wrong InstanceId of SceneSingleton");
+            Assert.AreEqual(3, _container.ResolveByName<SingletonCounter>("ExternalSingleton").InstanceId, "Wrong InstanceId of ExternalSingleton");
 
             Assert.AreEqual(4, SingletonCounter.CreatedCount, "Wrong number of created singletones");
             Assert.AreEqual(1, SingletonCounter.DisposedCount, "Wrong number of disposed singletones");
@@ -113,9 +113,9 @@ namespace CryoDI.Tests
             Assert.AreEqual(2, TypeCounter.DisposedCount);
             
             
-            Assert.AreEqual(7, _container.Resolve<TypeCounter>("GlobalType").InstanceId);
-            Assert.AreEqual(8, _container.Resolve<TypeCounter>("SceneType").InstanceId);
-            Assert.AreEqual(9, _container.Resolve<TypeCounter>("ExternalType").InstanceId);
+            Assert.AreEqual(7, _container.ResolveByName<TypeCounter>("GlobalType").InstanceId);
+            Assert.AreEqual(8, _container.ResolveByName<TypeCounter>("SceneType").InstanceId);
+            Assert.AreEqual(9, _container.ResolveByName<TypeCounter>("ExternalType").InstanceId);
             
             Assert.AreEqual(9, TypeCounter.CreatedCount);
             Assert.AreEqual(2, TypeCounter.DisposedCount);
@@ -124,11 +124,11 @@ namespace CryoDI.Tests
         private void CheckInstances2()
         {
             Debug.Log("Checking instances #2");
-            Assert.AreEqual(1, _container.Resolve<InstanceCounter>("GlobalInstance").InstanceId);
+            Assert.AreEqual(1, _container.ResolveByName<InstanceCounter>("GlobalInstance").InstanceId);
 
             try
             {
-                _container.Resolve<InstanceCounter>("SceneInstance");
+                _container.ResolveByName<InstanceCounter>("SceneInstance");
                 Assert.IsTrue(false, "Expected exception was not thrown");
             }
             catch (ContainerException ex)
@@ -137,7 +137,7 @@ namespace CryoDI.Tests
                 Debug.Log("Got expected exception");
             }
             
-            Assert.AreEqual(3, _container.Resolve<InstanceCounter>("ExternalInstance").InstanceId);
+            Assert.AreEqual(3, _container.ResolveByName<InstanceCounter>("ExternalInstance").InstanceId);
 
             Assert.AreEqual(3, InstanceCounter.CreatedCount);
             Assert.AreEqual(1, InstanceCounter.DisposedCount, "Instance was not disposed");

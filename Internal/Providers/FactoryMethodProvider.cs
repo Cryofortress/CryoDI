@@ -20,10 +20,10 @@ namespace CryoDI.Providers
 
 		public LifeTime LifeTime { get; private set; }
 
-		public object GetObject(CryoContainer container)
+		public object GetObject(CryoContainer container, params object[] parameters)
 		{
 			var obj = _factoryMethod();
-		    container.BuildUp(obj);
+		    container.BuildUp(obj, parameters);
 
 			LifeTimeManager.TryToAdd(obj, LifeTime);
 			return obj;

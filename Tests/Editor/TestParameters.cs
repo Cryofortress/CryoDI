@@ -58,13 +58,29 @@ namespace CryoDI.Tests
 		public void TestBuildUp()
 		{
 			var container = new CryoContainer();
-			container.RegisterType<ManyParamsClass>();
 
 			var now = DateTime.Now;
 			var stream = new MemoryStream();
 			
 			var val = new ManyParamsClass();
 			container.BuildUp(val, stream, now, 3, 1.12f);
+			
+			Assert.AreEqual(now, val.DateTimeParam);
+			Assert.AreEqual(stream, val.DisposableParam);
+			Assert.AreEqual(3, val.IntParam);
+			Assert.AreEqual(1.12f, val.FloatParam, 0.000001);
+		}
+		
+		[Test]
+		public void TestResolve()
+		{
+			var container = new CryoContainer();
+			container.RegisterType<ManyParamsClass>();
+
+			var now = DateTime.Now;
+			var stream = new MemoryStream();
+			
+			var val = container.Resolve<ManyParamsClass>(stream, now, 3, 1.12f);
 			
 			Assert.AreEqual(now, val.DateTimeParam);
 			Assert.AreEqual(stream, val.DisposableParam);

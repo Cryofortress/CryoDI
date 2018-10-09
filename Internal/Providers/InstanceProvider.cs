@@ -17,7 +17,7 @@ namespace CryoDI.Providers
 
 		public LifeTime LifeTime { get; private set; }
 
-		public object GetObject(CryoContainer container)
+		public object GetObject(CryoContainer container, params object[] parameters)
 		{
 		    if (_disposed)
 		        throw new ContainerException("Instance of type " + typeof(T) + " already disposed");

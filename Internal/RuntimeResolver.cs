@@ -13,7 +13,7 @@
 
 		public T Get()
 		{
-			return _container.Resolve<T>(_name);
+			return _container.ResolveByName<T>(_name);
 		}
 	}
 }
