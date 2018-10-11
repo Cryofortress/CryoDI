@@ -12,20 +12,13 @@ namespace CryoDI
 		private static UnityStarter _instance;
 		private CryoContainer _container;
 		
-		protected UnityStarter()
-		{
-			if (_instance != null)
-			{
-				throw new ContainerException("UnityStarter already created");
-			}
-
-			_instance = this;
-		}
-
 		public static UnityStarter Instance
 		{
 			get
 			{
+				if (_instance == null)
+					_instance = GameObject.FindObjectOfType<UnityStarter>();
+				
 				if (_instance == null)
 					throw new ContainerException("UnityStarter not found");
 				return _instance;
@@ -56,13 +49,14 @@ namespace CryoDI
 
 		private void Awake()
 		{
-			if (_container != null)
+			if (_container == null)
 				((IInternalContainerBuidler)this).CreateRootContainer();
 		}
 
 		private void OnDestroy()
 		{
-			_container.Dispose();
+			if (_container != null)
+				_container.Dispose();
 		}
 	}
 #endif

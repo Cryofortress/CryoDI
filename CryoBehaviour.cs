@@ -11,7 +11,7 @@ namespace CryoDI
 
 	    public bool BuiltUp { get; private set; }
 
-        public virtual void Awake()
+        protected virtual void Awake()
         {
 	        BuildUp();
         }

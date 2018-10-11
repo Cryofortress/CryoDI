@@ -190,8 +190,7 @@ namespace CryoDI
 		}
 
 		private void ProcessParam(Type type, object obj, MemberInfo member, Param[] parameters)
-		{
-			
+		{	
 			var propertyInfo = (PropertyInfo) member;
 			object valueObj;
 
@@ -256,9 +255,13 @@ namespace CryoDI
 			{
 				var propertyType = propertyInfo.PropertyType;
 				
-				if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(IRuntimeResolver<>))
+				if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(IResolver<>))
 				{
-					valueObj = CreateRuntimeResolver(propertyType, attribName);
+					valueObj = CreateResolver(propertyType, attribName);
+				}
+				else if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(IBuilder<>))
+				{
+					valueObj = CreateBuilder(propertyType);
 				}
 				else
 					valueObj = ResolveByName(propertyType, attribName);
@@ -285,11 +288,18 @@ namespace CryoDI
 			
 		}
 
-		private object CreateRuntimeResolver(Type propertyType, string name)
+		private object CreateResolver(Type propertyType, string name)
 		{
 			var args = propertyType.GetGenericArguments();
-			var resolverType = typeof(RuntimeResolver<>).MakeGenericType(args);
+			var resolverType = typeof(Resolver<>).MakeGenericType(args);
 			return Activator.CreateInstance(resolverType, name, this);
+		}
+		
+		private object CreateBuilder(Type propertyType)
+		{
+			var args = propertyType.GetGenericArguments();
+			var resolverType = typeof(Builder<>).MakeGenericType(args);
+			return Activator.CreateInstance(resolverType, this);
 		}
 
 		public void Dispose()

@@ -131,7 +131,7 @@ namespace CryoDI.Tests
                 _container.ResolveByName<InstanceCounter>("SceneInstance");
                 Assert.IsTrue(false, "Expected exception was not thrown");
             }
-            catch (ContainerException ex)
+            catch (ContainerException)
             {
                 // expected exception
                 Debug.Log("Got expected exception");
