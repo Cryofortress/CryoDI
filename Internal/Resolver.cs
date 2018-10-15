@@ -11,7 +11,7 @@
 			_container = container;
 		}
 
-		public T Get(params object[] parameters)
+		public T Resolve(params object[] parameters)
 		{
 			return _container.ResolveByName<T>(_name, parameters);
 		}
