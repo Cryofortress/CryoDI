@@ -42,7 +42,7 @@ namespace CryoDI.Tests
 
 			try
 			{
-				var val = container.Resolve<ClassWithParams>();
+				container.Resolve<ClassWithParams>();
 				Assert.Fail("Expected exception not happened");
 			}
 			catch (ContainerException)
