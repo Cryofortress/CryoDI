@@ -1,0 +1,74 @@
+﻿using NUnit.Framework;
+
+namespace CryoDI.Tests
+{
+	class ClassBase
+	{
+		[Dependency("PrivateBase")]
+		private string PrivateProperty { get; set; }
+		[Dependency("ProtectedBase")]
+		protected string ProtectedProperty { get; set; }
+		[Dependency("PublicBase")]
+		public string PublicProperty { get; set; }
+
+		public virtual void Check()
+		{
+			Assert.AreEqual("private base", PrivateProperty);
+			Assert.AreEqual("protected base", ProtectedProperty);
+			Assert.AreEqual("public base", PublicProperty);
+		}
+	}
+
+	class ClassDerived : ClassBase
+	{
+		[Dependency("PrivateDerived")]
+		private string PrivateProperty { get; set; }
+		[Dependency("ProtectedDerived")]
+		protected string ProtectedProperty { get; set; }
+		[Dependency("PublicDerived")]
+		public string PublicProperty { get; set; }
+
+		public override void Check()
+		{
+			base.Check();
+			
+			Assert.AreEqual("private derived", PrivateProperty);
+			Assert.AreEqual("protected derived", ProtectedProperty);
+			Assert.AreEqual("public derived", PublicProperty);
+		}
+	}	
+		
+	[TestFixture]
+	public class TestNonPublicProperties
+	{
+		[Test]
+		public void TestSimpleProperties()
+		{
+			var container = new CryoContainer();
+			container.RegisterInstance("private base", "PrivateBase");
+			container.RegisterInstance("protected base", "ProtectedBase");
+			container.RegisterInstance("public base", "PublicBase");
+
+			var a = new ClassBase();
+			container.BuildUp(a);
+			a.Check();
+		}
+		
+		[Test]
+		public void TestDerivedProperties()
+		{
+			var container = new CryoContainer();
+			container.RegisterInstance("private base", "PrivateBase");
+			container.RegisterInstance("protected base", "ProtectedBase");
+			container.RegisterInstance("public base", "PublicBase");
+			
+			container.RegisterInstance("private derived", "PrivateDerived");
+			container.RegisterInstance("protected derived", "ProtectedDerived");
+			container.RegisterInstance("public derived", "PublicDerived");
+			
+			var a = new ClassDerived();
+			container.BuildUp(a);
+			a.Check();
+		}
+	}
+}

@@ -167,31 +167,29 @@ namespace CryoDI
 			IEnumerable<MemberInfo> members =
 				type.GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.SetProperty | BindingFlags.Public | BindingFlags.Instance);
 #else
-			MemberInfo[] members = type.FindMembers(MemberTypes.Property,
-				BindingFlags.FlattenHierarchy | BindingFlags.SetProperty | BindingFlags.Public | BindingFlags.Instance, null,
-				null);
+			var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
+			
 #endif
 
-			foreach (MemberInfo member in members)
+			foreach (PropertyInfo property in properties)
 			{
-				var dependencyAttr = member.GetCustomAttributes(typeof(DependencyAttribute), true).FirstOrDefault() as DependencyAttribute;
+				var dependencyAttr = property.GetCustomAttributes(typeof(DependencyAttribute), true).FirstOrDefault() as DependencyAttribute;
 				if (dependencyAttr != null)
 				{
-					ProcessDependency(type, obj, member, dependencyAttr.Name);
+					ProcessDependency(type, obj, property, dependencyAttr.Name);
 					continue;
 				}
 				
-				var paramAttribute = member.GetCustomAttributes(typeof(ParamAttribute), true).FirstOrDefault() as ParamAttribute;
+				var paramAttribute = property.GetCustomAttributes(typeof(ParamAttribute), true).FirstOrDefault() as ParamAttribute;
 				if (paramAttribute != null)
 				{
-					ProcessParam(type, obj, member, parameters);
+					ProcessParam(type, obj, property, parameters);
 				}
 			}
 		}
 
-		private void ProcessParam(Type type, object obj, MemberInfo member, Param[] parameters)
+		private void ProcessParam(Type type, object obj, PropertyInfo propertyInfo, Param[] parameters)
 		{	
-			var propertyInfo = (PropertyInfo) member;
 			object valueObj;
 
 			BuildUpStack.SetPropertyName(propertyInfo.Name);
@@ -244,9 +242,8 @@ namespace CryoDI
 			throw new ContainerException("Can't find assignable parameter");
 		}
 
-		private void ProcessDependency(Type type, object obj, MemberInfo member, string attribName)
+		private void ProcessDependency(Type type, object obj, PropertyInfo propertyInfo, string attribName)
 		{
-			var propertyInfo = (PropertyInfo) member;
 			object valueObj;
 
 			BuildUpStack.SetPropertyName(propertyInfo.Name);
