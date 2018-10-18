@@ -42,7 +42,7 @@ namespace CryoDI.Tests
 	public class TestNonPublicProperties
 	{
 		[Test]
-		public void TestSimpleProperties()
+		public void TestSimplePropertiesBuildup()
 		{
 			var container = new CryoContainer();
 			container.RegisterInstance("private base", "PrivateBase");
@@ -55,7 +55,7 @@ namespace CryoDI.Tests
 		}
 		
 		[Test]
-		public void TestDerivedProperties()
+		public void TestDerivedPropertiesBuildup()
 		{
 			var container = new CryoContainer();
 			container.RegisterInstance("private base", "PrivateBase");
@@ -68,6 +68,37 @@ namespace CryoDI.Tests
 			
 			var a = new ClassDerived();
 			container.BuildUp(a);
+			a.Check();
+		}
+		
+		[Test]
+		public void TestSimplePropertiesResolve()
+		{
+			var container = new CryoContainer();
+			container.RegisterInstance("private base", "PrivateBase");
+			container.RegisterInstance("protected base", "ProtectedBase");
+			container.RegisterInstance("public base", "PublicBase");
+			container.RegisterType<ClassBase>();
+
+
+			var a = container.Resolve<ClassBase>();
+			a.Check();
+		}
+		
+		[Test]
+		public void TestDerivedPropertiesResolve()
+		{
+			var container = new CryoContainer();
+			container.RegisterInstance("private base", "PrivateBase");
+			container.RegisterInstance("protected base", "ProtectedBase");
+			container.RegisterInstance("public base", "PublicBase");
+			
+			container.RegisterInstance("private derived", "PrivateDerived");
+			container.RegisterInstance("protected derived", "ProtectedDerived");
+			container.RegisterInstance("public derived", "PublicDerived");
+			container.RegisterType<ClassDerived>();
+
+			var a = container.Resolve<ClassDerived>();
 			a.Check();
 		}
 	}
