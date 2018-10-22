@@ -24,9 +24,9 @@ namespace CryoDI.Tests
 		[Dependency("PrivateDerived")]
 		private string PrivateProperty { get; set; }
 		[Dependency("ProtectedDerived")]
-		protected string ProtectedProperty { get; set; }
+		protected new string ProtectedProperty { get; set; }
 		[Dependency("PublicDerived")]
-		public string PublicProperty { get; set; }
+		public new string PublicProperty { get; set; }
 
 		public override void Check()
 		{
