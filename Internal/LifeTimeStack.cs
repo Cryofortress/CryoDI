@@ -2,9 +2,9 @@
 
 namespace CryoDI
 {
-	internal static class LifeTimeStack
+	internal class LifeTimeStack
 	{
-		private static List<Entry> _stack = new List<Entry>();
+		private readonly List<Entry> _stack = new List<Entry>();
 
 		private class Entry
 		{
@@ -12,7 +12,7 @@ namespace CryoDI
 			public LifeTime LifeTime { get; set; }
 		}
 
-		public static void Push(ContainerKey key, LifeTime lifetime)
+		public void Push(ContainerKey key, LifeTime lifetime)
 		{
 			_stack.Add(new Entry
 			{
@@ -23,14 +23,14 @@ namespace CryoDI
 			CheckLifeTime();
 		}
 
-		public static void Pop()
+		public void Pop()
 		{
 			if (_stack.Count == 0)
 				throw new ContainerException("Unexpected state: stack is empty");
 			_stack.RemoveAt(_stack.Count - 1);
 		}
 
-		private static void CheckLifeTime()
+		private void CheckLifeTime()
 		{
 			if (_stack.Count <= 1)
 				return;

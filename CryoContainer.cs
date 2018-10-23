@@ -13,6 +13,8 @@ namespace CryoDI
 	public class CryoContainer : IDisposable
 	{
 		private readonly Dictionary<ContainerKey, IObjectProvider> _providers = new Dictionary<ContainerKey, IObjectProvider>();
+		private readonly BuildUpStack _buildUpStack = new BuildUpStack();
+		private readonly LifeTimeStack _lifetimeStack = new LifeTimeStack();
 
 		/// <summary>
 		/// Проверить, зарегистрирован ли обьект в контейнере
@@ -56,15 +58,10 @@ namespace CryoDI
 				throw new ContainerException("Can't resolve type " + type.FullName +
 				                             (name == null ? "" : " registered with name \"" + name + "\""));
 
-			try
-			{
-				LifeTimeStack.Push(key, provider.LifeTime);
-				return provider.GetObject(this, parameters);
-			}
-			finally
-			{
-				LifeTimeStack.Pop();
-			}
+			_lifetimeStack.Push(key, provider.LifeTime);
+			var obj = provider.GetObject(this, parameters);
+			_lifetimeStack.Pop();
+			return obj;
 		}
 
 		/// <summary>
@@ -101,15 +98,10 @@ namespace CryoDI
 			if (provider == null)
 				return null;
 
-			try
-			{
-				LifeTimeStack.Push(key, provider.LifeTime);
-				return provider.GetObject(this, parameters);
-			}
-			finally
-			{
-				LifeTimeStack.Pop();
-			}
+			_lifetimeStack.Push(key, provider.LifeTime);
+			var obj = provider.GetObject(this, parameters);
+			_lifetimeStack.Pop();
+			return obj;
 		}
 
 		/// <summary>
@@ -125,17 +117,11 @@ namespace CryoDI
 	    /// </summary>
 	    public void BuildUp(object obj, params object[] parameters)
 	    {
-		    BuildUpStack.PushObject(obj);
+		    _buildUpStack.PushObject(obj);
 
-		    try
-		    {
-			    BuildUp(obj.GetType(), obj, parameters);
-			    PostBuildUp(obj);
-		    }
-		    finally
-		    {
-			    BuildUpStack.Pop();
-		    }
+			BuildUp(obj.GetType(), obj, parameters);
+			PostBuildUp(obj);
+			_buildUpStack.Pop();
 	    }
 
 		private void BuildUp(Type type, object obj, object[] parameters)
@@ -192,7 +178,7 @@ namespace CryoDI
 		{	
 			object valueObj;
 
-			BuildUpStack.SetPropertyName(propertyInfo.Name);
+			_buildUpStack.SetPropertyName(propertyInfo.Name);
 
 			try
 			{
@@ -221,7 +207,6 @@ namespace CryoDI
 			var param = parameters.FirstOrDefault(p => p.Name == propertyName);
 			if (param != null)
 			{
-				
 				if (param.Value != null && !propertyType.IsInstanceOfType(param.Value))
 					throw new ContainerException("Parameter value can't be assigned");
 				return param.Value;
@@ -247,7 +232,7 @@ namespace CryoDI
 		{
 			object valueObj;
 
-			BuildUpStack.SetPropertyName(propertyInfo.Name);
+			_buildUpStack.SetPropertyName(propertyInfo.Name);
 
 			try
 			{

@@ -3,10 +3,10 @@ using System.Text;
 
 namespace CryoDI
 {
-	internal static class BuildUpStack
+	internal class BuildUpStack
 	{
-		private static List<IInitializable> _initializables = new List<IInitializable>();
-		private static List<Entry> _stack = new List<Entry>();
+		private List<IInitializable> _initializables = new List<IInitializable>();
+		private List<Entry> _stack = new List<Entry>();
 
 		internal class Entry
 		{
@@ -14,7 +14,7 @@ namespace CryoDI
 			public string PropertyName { get; set; }
 		}
 
-		public static void PushObject(object obj)
+		public void PushObject(object obj)
 		{
 			_stack.Add(new Entry
 			{
@@ -27,12 +27,12 @@ namespace CryoDI
 				AddInitializable(initializable);
 		}
 
-		public static void SetPropertyName(string propertyName)
+		public void SetPropertyName(string propertyName)
 		{
 			Peek().PropertyName = propertyName;
 		}
 
-		public static void Pop()
+		public void Pop()
 		{
 			if (_stack.Count == 0)
 				throw new ContainerException("Unexpected state: stack is empty");
@@ -42,12 +42,12 @@ namespace CryoDI
 				CallInitialize();
 		}
 
-		private static void AddInitializable(IInitializable obj)
+		private void AddInitializable(IInitializable obj)
 		{
 			_initializables.Add(obj);
 		}
 
-		private static void CheckCircularDependency(object obj)
+		private void CheckCircularDependency(object obj)
 		{
 			for (int i = _stack.Count - 2; i >= 0; --i)
 			{
@@ -58,7 +58,7 @@ namespace CryoDI
 			}
 		}
 
-		private static void DumpCircularDependency(int from)
+		private void DumpCircularDependency(int from)
 		{
 			var builder = new StringBuilder();
 			builder.Append("Type: " + _stack[from].Object.GetType() + ". Property: " + _stack[from].PropertyName);
@@ -72,14 +72,14 @@ namespace CryoDI
 			DILog.LogWarning(builder.ToString());
 		}
 
-		private static Entry Peek()
+		private Entry Peek()
 		{
 			if (_stack.Count == 0)
 				throw new ContainerException("Unexpected state: stack is empty");
 			return _stack[_stack.Count - 1];
 		}
 
-		private static void CallInitialize()
+		private void CallInitialize()
 		{
 			var initializables = _initializables;
 			_initializables = new List<IInitializable>();
