@@ -221,7 +221,8 @@ namespace CryoDI
 			var param = parameters.FirstOrDefault(p => p.Name == propertyName);
 			if (param != null)
 			{
-				if (!propertyType.IsInstanceOfType(param.Value))
+				
+				if (param.Value != null && !propertyType.IsInstanceOfType(param.Value))
 					throw new ContainerException("Parameter value can't be assigned");
 				return param.Value;
 			}
