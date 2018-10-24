@@ -12,6 +12,11 @@ namespace CryoDI
 			public LifeTime LifeTime { get; set; }
 		}
 
+		public LifeTimeStack()
+		{
+			OnLifetimeError = Reaction.LogError;
+		}
+
 		public void Push(ContainerKey key, LifeTime lifetime)
 		{
 			_stack.Add(new Entry
@@ -29,6 +34,8 @@ namespace CryoDI
 				throw new ContainerException("Unexpected state: stack is empty");
 			_stack.RemoveAt(_stack.Count - 1);
 		}
+		
+		public Reaction OnLifetimeError { get; set; }
 
 		private void CheckLifeTime()
 		{
@@ -41,7 +48,22 @@ namespace CryoDI
 			{
 				var message = "You are trying to inject the object with lifetime = Scene {" +
 					child.Key + "} into object with lifetime = Global {" + parent.Key +"}";
+				HandleLifetimeError(message);
+			}
+		}
+
+		private void HandleLifetimeError(string message)
+		{
+			switch (OnLifetimeError)
+			{
+			case Reaction.LogWarning:
+				DILog.LogWarning(message);
+				break;
+			case Reaction.LogError:
 				DILog.LogError(message);
+				break;
+			case Reaction.ThrowException:
+				throw new WrongLifetimeException(message);
 			}
 		}
 	}

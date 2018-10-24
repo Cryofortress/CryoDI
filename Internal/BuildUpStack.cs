@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text;
+using DefaultNamespace;
 
 namespace CryoDI
 {
@@ -13,6 +14,13 @@ namespace CryoDI
 			public object Object { get; set; }
 			public string PropertyName { get; set; }
 		}
+
+		public BuildUpStack()
+		{
+			OnCircularDependency = Reaction.LogError;
+		}
+		
+		public Reaction OnCircularDependency { get; set; }
 
 		public void PushObject(object obj)
 		{
@@ -53,13 +61,16 @@ namespace CryoDI
 			{
 				if (ReferenceEquals(_stack[i].Object, obj))
 				{
-					DumpCircularDependency(i);
+					HandleCircularDependency(i);
 				}
 			}
 		}
 
-		private void DumpCircularDependency(int from)
+		private void HandleCircularDependency(int from)
 		{
+			if (OnCircularDependency == Reaction.Ignore)
+				return;
+			
 			var builder = new StringBuilder();
 			builder.Append("Type: " + _stack[from].Object.GetType() + ". Property: " + _stack[from].PropertyName);
 			for (int i = from; i < _stack.Count; ++i)
@@ -68,8 +79,18 @@ namespace CryoDI
 				builder.Append("Type: " + _stack[i].Object.GetType() + ". Property: " + _stack[i].PropertyName);
 			}
 
-			DILog.LogWarning("Circular dependency found: ");
-			DILog.LogWarning(builder.ToString());
+			switch (OnCircularDependency)
+			{
+			case Reaction.LogWarning:
+				DILog.LogWarning("Circular dependency found: " + builder.ToString());
+				break;
+			case Reaction.LogError:
+				DILog.LogError("Circular dependency found: " + builder.ToString());
+				break;
+			case Reaction.ThrowException:
+				throw new CircularDependencyException(builder.ToString());
+			}
+			
 		}
 
 		private Entry Peek()

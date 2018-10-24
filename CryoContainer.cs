@@ -15,6 +15,18 @@ namespace CryoDI
 		private readonly Dictionary<ContainerKey, IObjectProvider> _providers = new Dictionary<ContainerKey, IObjectProvider>();
 		private readonly BuildUpStack _buildUpStack = new BuildUpStack();
 		private readonly LifeTimeStack _lifetimeStack = new LifeTimeStack();
+		
+		public Reaction OnLifetimeError
+		{
+			get { return _lifetimeStack.OnLifetimeError; }
+			set { _lifetimeStack.OnLifetimeError = value; }
+		}
+		
+		public Reaction OnCircularDependency
+		{
+			get { return _buildUpStack.OnCircularDependency; }
+			set { _buildUpStack.OnCircularDependency = value; }
+		}
 
 		/// <summary>
 		/// Проверить, зарегистрирован ли обьект в контейнере

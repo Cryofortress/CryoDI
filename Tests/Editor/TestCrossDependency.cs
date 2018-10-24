@@ -1,6 +1,7 @@
 ﻿#if UNITY_EDITOR
 
 using CryoDI;
+using DefaultNamespace;
 using UnityEngine;
 using NUnit.Framework;
 
@@ -81,6 +82,25 @@ namespace CryoDI.Tests
 			var b = a.ClassB;
 			Assert.IsNotNull(b.BackRef);
 			Assert.AreSame(b, b.BackRef);
+		}
+		
+		[Test]
+		public void ExceptionThrown()
+		{
+			var container = new CryoContainer();
+			container.OnCircularDependency = Reaction.ThrowException;
+			container.RegisterSingleton<ClassA>();
+			container.RegisterSingleton<ClassB>();
+
+			try
+			{
+				container.Resolve<ClassA>();
+				Assert.Fail("Exception expected");
+			}
+			catch (CircularDependencyException)
+			{
+				
+			}
 		}
 	}
 }
