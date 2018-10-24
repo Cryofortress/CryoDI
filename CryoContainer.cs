@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using CryoDI.Providers;
+using DefaultNamespace;
 using UnityEngine;
 
 namespace CryoDI
@@ -72,6 +73,7 @@ namespace CryoDI
 
 			_lifetimeStack.Push(key, provider.LifeTime);
 			var obj = provider.GetObject(this, parameters);
+			_buildUpStack.CheckCircularDependency(obj);
 			_lifetimeStack.Pop();
 			return obj;
 		}
@@ -249,7 +251,7 @@ namespace CryoDI
 			try
 			{
 				var propertyType = propertyInfo.PropertyType;
-				
+
 				if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(IResolver<>))
 				{
 					valueObj = CreateResolver(propertyType, attribName);
@@ -260,6 +262,14 @@ namespace CryoDI
 				}
 				else
 					valueObj = ResolveByName(propertyType, attribName);
+			}
+			catch (CircularDependencyException)
+			{
+				throw;
+			}
+			catch (WrongLifetimeException)
+			{
+				throw;
 			}
 			catch (ContainerException ex)
 			{

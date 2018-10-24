@@ -39,13 +39,17 @@ namespace CryoDI.Tests
 		}
 	}
 
+	
+
+	
+
 	[TestFixture]
 	public class TestCrossDependency
 	{
 		[Test]
 		public void RefResolved()
 		{
-			var container = new CryoContainer();
+			var container = new CryoContainer {OnCircularDependency = Reaction.LogWarning};
 			container.RegisterSingleton<ClassA>();
 			container.RegisterSingleton<ClassB>();
 
@@ -59,7 +63,7 @@ namespace CryoDI.Tests
 		[Test]
 		public void InitializeCalled()
 		{
-			var container = new CryoContainer();
+			var container = new CryoContainer {OnCircularDependency = Reaction.LogWarning};
 			container.RegisterSingleton<ClassA>();
 			container.RegisterSingleton<ClassB>();
 
@@ -71,7 +75,7 @@ namespace CryoDI.Tests
 		[Test]
 		public void RefSet()
 		{
-			var container = new CryoContainer();
+			var container = new CryoContainer {OnCircularDependency = Reaction.LogWarning};
 			container.RegisterSingleton<ClassA>();
 			container.RegisterSingleton<ClassB>();
 
@@ -87,14 +91,99 @@ namespace CryoDI.Tests
 		[Test]
 		public void ExceptionThrown()
 		{
-			var container = new CryoContainer();
-			container.OnCircularDependency = Reaction.ThrowException;
+			var container = new CryoContainer {OnCircularDependency = Reaction.ThrowException};
 			container.RegisterSingleton<ClassA>();
 			container.RegisterSingleton<ClassB>();
 
 			try
 			{
 				container.Resolve<ClassA>();
+				Assert.Fail("Exception expected");
+			}
+			catch (CircularDependencyException)
+			{
+				// expected
+			}
+		}
+		
+		public class ClassC
+		{
+			[Dependency]
+			private ClassC Property { get; set; }
+		}
+
+		[Test]
+		public void SelfReference()
+		{
+			var container = new CryoContainer {OnCircularDependency = Reaction.LogWarning};
+			container.RegisterSingleton<ClassC>();
+			container.Resolve<ClassC>();
+		}
+		
+		[Test]
+		public void SelfReferenceThrow()
+		{
+			var container = new CryoContainer {OnCircularDependency = Reaction.ThrowException};
+			container.RegisterSingleton<ClassC>();
+
+			try
+			{
+				container.Resolve<ClassC>();
+				Assert.Fail("Exception expected");
+			}
+			catch (CircularDependencyException)
+			{
+				// expected
+			}
+		}
+		
+		public class Class1
+		{
+			[Dependency]
+			private Class2 Class2 { get; set; } 
+		}
+	
+		public class Class2
+		{
+			[Dependency]
+			private Class3 Class3 { get; set; } 
+		}
+	
+		public class Class3
+		{
+			[Dependency]
+			private Class4 Class4 { get; set; } 
+		}
+	
+		public class Class4
+		{
+			[Dependency]
+			private Class1 Class1 { get; set; } 
+		}
+
+		[Test]
+		public void LongChain()
+		{
+			var container = new CryoContainer {OnCircularDependency = Reaction.LogWarning};
+			container.RegisterSingleton<Class1>();
+			container.RegisterSingleton<Class2>();
+			container.RegisterSingleton<Class3>();
+			container.RegisterSingleton<Class4>();
+			container.Resolve<Class2>();
+		}
+		
+		[Test]
+		public void LongChainThrow()
+		{
+			var container = new CryoContainer {OnCircularDependency = Reaction.ThrowException};
+			container.RegisterSingleton<Class1>();
+			container.RegisterSingleton<Class2>();
+			container.RegisterSingleton<Class3>();
+			container.RegisterSingleton<Class4>();
+
+			try
+			{
+				container.Resolve<Class3>();
 				Assert.Fail("Exception expected");
 			}
 			catch (CircularDependencyException)

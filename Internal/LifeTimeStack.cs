@@ -44,10 +44,10 @@ namespace CryoDI
 
 			var parent = _stack[_stack.Count - 2];
 			var child = _stack[_stack.Count - 1];
-			if (parent.LifeTime == LifeTime.Global && child.LifeTime == LifeTime.Scene)
+			if (parent.LifeTime < child.LifeTime)
 			{
-				var message = "You are trying to inject the object with lifetime = Scene {" +
-					child.Key + "} into object with lifetime = Global {" + parent.Key +"}";
+				var message = "You are trying to inject the object with lifetime = " + child.LifeTime + " {" +
+					child.Key + "} into object with lifetime = " + parent.LifeTime + " {" + parent.Key +"}";
 				HandleLifetimeError(message);
 			}
 		}

@@ -28,7 +28,7 @@ namespace CryoDI
 			{
 				Object = obj
 			});
-			CheckCircularDependency(obj);
+			CheckCircularDependencyOnPush(obj);
 
 			var initializable = obj as IInitializable;
 			if (initializable != null)
@@ -50,12 +50,23 @@ namespace CryoDI
 				CallInitialize();
 		}
 
+		public void CheckCircularDependency(object obj)
+		{
+			for (int i = _stack.Count - 1; i >= 0; --i)
+			{
+				if (ReferenceEquals(_stack[i].Object, obj))
+				{
+					HandleCircularDependency(i);
+				}
+			}
+		}
+
 		private void AddInitializable(IInitializable obj)
 		{
 			_initializables.Add(obj);
 		}
 
-		private void CheckCircularDependency(object obj)
+		private void CheckCircularDependencyOnPush(object obj)
 		{
 			for (int i = _stack.Count - 2; i >= 0; --i)
 			{
@@ -73,7 +84,7 @@ namespace CryoDI
 			
 			var builder = new StringBuilder();
 			builder.Append("Type: " + _stack[from].Object.GetType() + ". Property: " + _stack[from].PropertyName);
-			for (int i = from; i < _stack.Count; ++i)
+			for (int i = from + 1; i < _stack.Count; ++i)
 			{
 				builder.AppendLine(" -> ");
 				builder.Append("Type: " + _stack[i].Object.GetType() + ". Property: " + _stack[i].PropertyName);
