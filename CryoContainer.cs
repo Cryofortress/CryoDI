@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using CryoDI.Providers;
 using DefaultNamespace;
-using UnityEngine;
 
 namespace CryoDI
 {
