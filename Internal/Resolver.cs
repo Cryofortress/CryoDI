@@ -15,5 +15,11 @@
 		{
 			return _container.ResolveByName<T>(_name, parameters);
 		}
+		
+		public T ResolveByName(string name, params object[] parameters)
+		{
+			return _container.ResolveByName<T>(name, parameters);
+		}
+		
 	}
 }
