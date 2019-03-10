@@ -1,11 +1,8 @@
 ﻿#if UNITY_5_3_OR_NEWER
 using UnityEngine;
-#endif
 
 namespace CryoDI
-{
-#if UNITY_5_3_OR_NEWER
-	
+{	
 	/// <summary>
 	/// Класс, предназначенный для создания и настройки контейнера в Unity
 	/// </summary>
@@ -61,5 +58,5 @@ namespace CryoDI
 				_container.Dispose();
 		}
 	}
-#endif
 }
+#endif

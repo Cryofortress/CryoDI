@@ -2,8 +2,8 @@
 {
     public enum LifeTime
     {
+        External,
         Global,
         Scene,
-        External
     }
 }

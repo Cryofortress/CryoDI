@@ -9,34 +9,13 @@ namespace CryoDI
 {
     internal static class LifeTimeManager
     {
-        private class SceneDisposables
-        {
-	        private readonly List<IDisposable> _disposables = new List<IDisposable>();
-	        
-            public string SceneName { get; private set; }
-
-	        public SceneDisposables(string sceneName)
-	        {
-		        SceneName = sceneName;
-	        }
-	        
-	        public void Add(IDisposable disposable)
-	        {
-		        _disposables.Add(disposable);
-	        }
-
-            public void Dispose()
-            {
-                foreach (var disposable in _disposables)
-                {
-                    disposable.Dispose();
-                }
-            }
-        }
-
-        private static List<SceneDisposables> _scenes;
-	    private static SceneDisposables _lastScene;
+        private static readonly Dictionary<int, Entry> _entries = new Dictionary<int, Entry>();
 	    private static readonly List<IDisposable> _global = new List<IDisposable>();
+
+		static LifeTimeManager()
+		{
+			SceneManager.sceneUnloaded += OnSceneUnloaded;
+		}
 
         public static void TryToAdd(object obj, LifeTime lifeTime)
         {
@@ -54,23 +33,22 @@ namespace CryoDI
 	    public static void DisposeAll()
 	    {
 		    // среди этих списков может быть ссылка на сам контейнер. Поэтому создаем временную копию
-		    
-		    SceneDisposables[] scenesToDispose = null;
+		    Entry[] entries = null;
 
-		    if (_scenes != null)
+		    if (_entries != null)
 		    {
-			    scenesToDispose = _scenes.ToArray();
-			    _scenes.Clear();
+			    entries = _entries.Values.ToArray();
+			    _entries.Clear();
 		    }
 
 		    var globalsToDispose = _global.ToArray();
 		    _global.Clear();
 
-		    if (scenesToDispose != null)
+		    if (entries != null)
 		    {
-			    foreach (var scene in scenesToDispose)
+			    foreach (var entry in entries)
 			    {
-				    scene.Dispose();
+				    entry.Dispose();
 			    }
 		    }
 
@@ -81,46 +59,61 @@ namespace CryoDI
 	    }
 
 	    private static void AddSceneDisposable(IDisposable disposable)
-        {
-            GetCurScene().Add(disposable);
-        }
+		{
+			var entry = GetCurEntry();
+			entry.Add(disposable);
+			DILog.Log("Object " + disposable.GetType() + " was added for scene " + entry.SceneName);
+		}
 
-        private static SceneDisposables GetCurScene()
+        private static Entry GetCurEntry()
         {
-            if (_scenes == null)
-		        Init();
+			var activeScene = SceneManager.GetActiveScene();
+			DILog.Log("Active scene: " + activeScene.name + "(" + activeScene.handle + ")");
 
-	        var activeSceneName = SceneManager.GetActiveScene().name;
-	        if (_lastScene != null && _lastScene.SceneName == activeSceneName)
-		        return _lastScene;
-	        
-	        var coll = _scenes.FirstOrDefault(o => o.SceneName == activeSceneName);
-			if (coll == null)
+			Entry entry;
+			if (!_entries.TryGetValue(activeScene.handle, out entry))
 			{
-				coll = new SceneDisposables(activeSceneName);
-				_scenes.Add(coll);
+				entry = new Entry(activeScene.name);
+				_entries.Add(activeScene.handle, entry);
 			}
-	        _lastScene = coll;
-            return coll;
+            return entry;
         }
-
-	    private static void Init()
-	    {
-		    _scenes = new List<SceneDisposables>();
-		    SceneManager.sceneUnloaded += OnSceneUnloaded;
-	    }
 
 	    private static void OnSceneUnloaded(Scene scene)
         {
-            var coll = _scenes.FirstOrDefault(o => o.SceneName == SceneManager.GetActiveScene().name);
-            if (coll != null)
-            {
-                coll.Dispose();
-                _scenes.Remove(coll);
-            }
-	        if (Object.ReferenceEquals(_lastScene, coll))
-		        _lastScene = null;
+			DILog.Log("Scene unloaded: " + scene.name + "(" + scene.handle + ")");
+			if (_entries.TryGetValue(scene.handle, out var entry))
+			{
+				entry.Dispose();
+				_entries.Remove(scene.handle);
+			}
         }
+	    
+		private class Entry
+		{
+			private readonly List<IDisposable> _disposables = new List<IDisposable>();
+	        
+			public string SceneName { get; private set; }
+
+			public Entry(string sceneName)
+			{
+				SceneName = sceneName;
+			}
+	        
+			public void Add(IDisposable disposable)
+			{
+				_disposables.Add(disposable);
+			}
+
+			public void Dispose()
+			{
+				foreach (var disposable in _disposables)
+				{
+					disposable.Dispose();
+				}
+				_disposables.Clear();
+			}
+		}
     }
 }
 #else

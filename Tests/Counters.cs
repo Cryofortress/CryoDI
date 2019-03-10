@@ -2,7 +2,7 @@
 
 namespace CryoDI.Tests
 {
-    public class SingletonCounter : IDisposable
+    internal class SingletonCounter : IDisposable
     {
         public static int CreatedCount { get; private set; }
         public static int DisposedCount { get; private set; }
@@ -20,7 +20,7 @@ namespace CryoDI.Tests
         }
     }
 
-    public class TypeCounter : IDisposable
+    internal class TypeCounter : IDisposable
     {
         public static int CreatedCount { get; private set; }
         public static int DisposedCount { get; private set; }
@@ -38,7 +38,7 @@ namespace CryoDI.Tests
         }
     }
 
-    public class InstanceCounter : IDisposable
+    internal class InstanceCounter : IDisposable
     {
         public static int CreatedCount { get; private set; }
         public static int DisposedCount { get; private set; }
