@@ -62,13 +62,13 @@ namespace CryoDI
 		{
 			var entry = GetCurEntry();
 			entry.Add(disposable);
-			DILog.Log("Object " + disposable.GetType() + " was added for scene " + entry.SceneName);
+			//DILog.Log($"[LifetimeManager] Object {disposable.GetType()} was added for scene {entry.SceneName}");
 		}
 
         private static Entry GetCurEntry()
         {
 			var activeScene = SceneManager.GetActiveScene();
-			DILog.Log("Active scene: " + activeScene.name + "(" + activeScene.handle + ")");
+			//DILog.Log("[LifetimeManager] Active scene: {activeScene.name} ({activeScene.handle})");
 
 			Entry entry;
 			if (!_entries.TryGetValue(activeScene.handle, out entry))
@@ -81,7 +81,7 @@ namespace CryoDI
 
 	    private static void OnSceneUnloaded(Scene scene)
         {
-			DILog.Log("Scene unloaded: " + scene.name + "(" + scene.handle + ")");
+			DILog.Log($"[LifetimeManager] Scene unloaded: {scene.name} ({scene.handle})");
 			if (_entries.TryGetValue(scene.handle, out var entry))
 			{
 				entry.Dispose();
