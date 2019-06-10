@@ -54,40 +54,26 @@ namespace CryoDI.Tests
 			container.Resolve<MyInstance>();
 		}
 		
+		// Мы не можем предсказать время жизни external объектов. 
+		// Оно может быть как больше времени жизни контейнера, так и меньше сцены
 		[Test] 
 		public void ExternalInGlobal()
 		{
 			var container = new CryoContainer {OnLifetimeError = Reaction.ThrowException};
 			container.RegisterSingleton<MySingleton>(LifeTime.External);
 			container.RegisterType<MyInstance>(LifeTime.Global);
-		
-			try
-			{
-				container.Resolve<MyInstance>();
-				Assert.Fail("Exception expected");
-			}
-			catch (WrongLifetimeException)
-			{
-				// expected
-			}
+			container.Resolve<MyInstance>();
 		}
 		
+		// Мы не можем предсказать время жизни external объектов. 
+		// Оно может быть как больше времени жизни контейнера, так и меньше сцены
 		[Test]
 		public void ExternalInScene()
 		{
 			var container = new CryoContainer {OnLifetimeError = Reaction.ThrowException};
 			container.RegisterSingleton<MySingleton>(LifeTime.External);
 			container.RegisterType<MyInstance>(LifeTime.Scene);
-		
-			try
-			{
-				container.Resolve<MyInstance>();
-				Assert.Fail("Exception expected");
-			}
-			catch (WrongLifetimeException)
-			{
-				// expected
-			}
+			container.Resolve<MyInstance>();
 		}
 
 		[Test]

@@ -7,6 +7,7 @@ namespace CryoDI
 	internal class BuildUpStack
 	{
 		private List<IInitializable> _initializables = new List<IInitializable>();
+		private List<ILateInitializable> _lateInitializables = new List<ILateInitializable>();
 		private List<Entry> _stack = new List<Entry>();
 
 		internal class Entry
@@ -33,6 +34,10 @@ namespace CryoDI
 			var initializable = obj as IInitializable;
 			if (initializable != null)
 				AddInitializable(initializable);
+			
+			var lateInitializable = obj as ILateInitializable;
+			if (lateInitializable != null)
+				AddLateInitializable(lateInitializable);
 		}
 
 		public void SetPropertyName(string propertyName)
@@ -64,6 +69,11 @@ namespace CryoDI
 		private void AddInitializable(IInitializable obj)
 		{
 			_initializables.Add(obj);
+		}
+		
+		private void AddLateInitializable(ILateInitializable obj)
+		{
+			_lateInitializables.Add(obj);
 		}
 
 		private void CheckCircularDependencyOnPush(object obj)
@@ -118,6 +128,13 @@ namespace CryoDI
 			foreach (var initializable in initializables)
 			{
 				initializable.Initialize();
+			}
+			
+			var lateInitializables = _lateInitializables;
+			_lateInitializables = new List<ILateInitializable>();
+			foreach (var lateInitializable in lateInitializables)
+			{
+				lateInitializable.LateInitialize();
 			}
 		}
 	}

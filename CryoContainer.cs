@@ -136,6 +136,12 @@ namespace CryoDI
 			PostBuildUp(obj);
 			_buildUpStack.Pop();
 	    }
+		
+		public T BuildUp<T>(T obj, params object[] parameters)
+		{
+			BuildUp((object) obj, parameters);
+			return obj;
+		}
 
 		private void BuildUp(Type type, object obj, object[] parameters)
 		{
@@ -187,7 +193,7 @@ namespace CryoDI
 			}
 		}
 
-		private void ProcessParam(Type type, object obj, PropertyInfo propertyInfo, Param[] parameters)
+		private void ProcessParam(Type type, object obj, PropertyInfo propertyInfo, IEnumerable<Param> parameters)
 		{	
 			object valueObj;
 
@@ -211,7 +217,7 @@ namespace CryoDI
 				setter.Invoke(obj, new[] {valueObj});
 		}
 
-		private object FindParameter(PropertyInfo propertyInfo, Param[] parameters)
+		private object FindParameter(PropertyInfo propertyInfo, IEnumerable<Param> parameters)
 		{
 			
 			var propertyName = propertyInfo.Name;
@@ -259,6 +265,10 @@ namespace CryoDI
 				{
 					valueObj = CreateBuilder(propertyType);
 				}
+				else if (propertyType == typeof(IPrefabInstantiator))
+				{
+					valueObj = CreatePrefabInstantiator();
+				}
 				else
 					valueObj = ResolveByName(propertyType, attribName);
 			}
@@ -304,6 +314,11 @@ namespace CryoDI
 			var args = propertyType.GetGenericArguments();
 			var resolverType = typeof(Builder<>).MakeGenericType(args);
 			return Activator.CreateInstance(resolverType, this);
+		}
+		
+		private object CreatePrefabInstantiator()
+		{
+			return new PrefabInstantiator(this);
 		}
 
 		public void Dispose()

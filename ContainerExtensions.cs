@@ -204,6 +204,16 @@ namespace CryoDI
 		{
 			return container.RegisterProvider<T>(new ScenePathProvider<T>(path, lifeTime), null);
 		}
+		
+		public static CryoContainer RegisterSceneObject<T>(this CryoContainer container, LifeTime lifeTime) where T : UnityEngine.Object
+		{
+			return container.RegisterProvider<T>(new FindObjectProvider<T>(lifeTime), null);
+		}
+		
+		public static CryoContainer RegisterSceneObject<TBase, TDerived>(this CryoContainer container, LifeTime lifeTime) where TDerived : UnityEngine.Object, TBase
+		{
+			return container.RegisterProvider<TBase>(new FindObjectProvider<TDerived>(lifeTime), null);
+		}
 #endif
 		#endregion SceneObject
 
