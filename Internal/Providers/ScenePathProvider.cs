@@ -35,6 +35,24 @@ namespace CryoDI.Providers
 			}
 			return _cached;
 		}
+		
+		public object WeakGetObject(CryoContainer container, params object[] parameters)
+		{
+			if (IsDestroyed())
+			{
+				if (!TryToFindObject(out _cached))
+					return null;
+
+				var cryoBehaviour = _cached as CryoBehaviour;
+				if (cryoBehaviour != null && !cryoBehaviour.BuiltUp)
+				{
+					cryoBehaviour.BuildUp();
+				}
+
+				LifeTimeManager.TryToAdd(this, LifeTime);
+			}
+			return _cached;
+		}
 
 	    public void Dispose()
 	    {
@@ -85,6 +103,39 @@ namespace CryoDI.Providers
 				return component;
 
 			throw new ContainerException("Can't find component \"" + typeof (T).FullName + "\" of game object \"" + _path + "\"");
+		}
+		
+		private bool TryToFindObject(out T value)
+		{
+			var gameObject = new MaskFinder().Find(_path);
+			if (gameObject == null)
+			{
+				value = default(T);
+				return false;
+			}
+
+			if (typeof(T) == typeof(GameObject))
+			{
+				value = (T) (object) gameObject;
+				return true;
+			}
+
+			if (typeof(T) == typeof(Transform))
+			{
+				value = (T) (object) gameObject.transform;
+				return true;
+			}
+
+			var components = gameObject.GetComponents<Component>();
+			T component = components.OfType<T>().FirstOrDefault();
+			if (component != null)
+			{
+				value = component;
+				return true;
+			}
+
+			value = default(T);
+			return false;
 		}
 	}
 }

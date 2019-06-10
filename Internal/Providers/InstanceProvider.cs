@@ -17,10 +17,16 @@ namespace CryoDI.Providers
 
 		public LifeTime LifeTime { get; private set; }
 
-		public object GetObject(CryoContainer container, params object[] parameters)
+		public object GetObject(CryoContainer container, params object[] unused)
 		{
 		    if (_disposed)
 		        throw new ContainerException("Instance of type " + typeof(T) + " already disposed");
+			return _instance;
+		}
+
+		public object WeakGetObject(CryoContainer container, params object[] unused)
+		{
+			if (_disposed) return null;
 			return _instance;
 		}
 

@@ -5,7 +5,7 @@ namespace CryoDI.Providers
 	internal class SingletonProvider<T> : IObjectProvider
 	{
 		private T _instance;
-	    private bool _created;
+	    private bool _exist;
 		private readonly Func<T> _factoryMethod;
 
 	    public SingletonProvider(LifeTime lifeTime) 
@@ -23,20 +23,28 @@ namespace CryoDI.Providers
 
 		public object GetObject(CryoContainer container, params object[] parameters)
 		{
-			if (!_created)
+			if (!_exist)
 			{
 				_instance = _factoryMethod();
-				_created = true;
+				_exist = true;
 
 			    container.BuildUp(_instance, parameters);
 			    LifeTimeManager.TryToAdd(this, LifeTime);
 			}
 			return _instance;
 		}
+		
+		public object WeakGetObject(CryoContainer container, params object[] parameters)
+		{
+			if (_exist)
+				return _instance;
+
+			return null;
+		}
 
 	    public void Dispose()
 	    {
-		    if (!_created)
+		    if (!_exist)
 			    return;
 
 		    if (LifeTime != LifeTime.External)
@@ -46,7 +54,7 @@ namespace CryoDI.Providers
 				    disposable.Dispose();
 		    }
 		    _instance = default(T);
-		    _created = false;
+		    _exist = false;
 	    }
 	}
 }

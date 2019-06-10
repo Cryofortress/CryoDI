@@ -6,5 +6,6 @@ namespace CryoDI.Providers
 	{
 		LifeTime LifeTime { get; }
 		object GetObject(CryoContainer container, params object[] parameters);
+		object WeakGetObject(CryoContainer container, params object[] parameters);
 	}
 }

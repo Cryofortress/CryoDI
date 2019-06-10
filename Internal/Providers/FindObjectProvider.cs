@@ -31,6 +31,25 @@ namespace CryoDI.Providers
 			return _cached;
 		}
 
+		public object WeakGetObject(CryoContainer container, params object[] parameters)
+		{
+			if (IsDestroyed())
+			{
+				_cached = Object.FindObjectOfType<T>();
+				if (_cached == null)
+					return null;
+
+				var cryoBehaviour = _cached as CryoBehaviour;
+				if (cryoBehaviour != null && !cryoBehaviour.BuiltUp)
+				{
+					cryoBehaviour.BuildUp();
+				}
+
+				LifeTimeManager.TryToAdd(this, LifeTime);
+			}
+			return _cached;
+		}
+
 		public void Dispose()
 		{
 			if (LifeTime != LifeTime.External)

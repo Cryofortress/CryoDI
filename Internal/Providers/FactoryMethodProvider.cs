@@ -29,6 +29,11 @@ namespace CryoDI.Providers
 			return obj;
 		}
 
+		public object WeakGetObject(CryoContainer container, params object[] parameters)
+		{
+			return null;
+		}
+
 		public void Dispose()
 		{
 			// do nothing
