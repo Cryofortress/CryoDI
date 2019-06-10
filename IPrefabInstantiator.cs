@@ -1,5 +1,6 @@
 #if UNITY_5_3_OR_NEWER
 using UnityEngine;
+#endif
 
 namespace CryoDI
 {
@@ -9,6 +10,7 @@ namespace CryoDI
 	/// </summary>
 	public interface IPrefabInstantiator
 	{
+#if UNITY_5_3_OR_NEWER
 		Object Instantiate(Object prefab, params object[] parameters);
 
 		Object Instantiate(Object prefab, Transform parent, params object[] parameters);
@@ -28,6 +30,6 @@ namespace CryoDI
 		T Instantiate<T>(T prefab, Vector3 pos, Quaternion rot, params object[] parameters) where T : Object;
 
 		T Instantiate<T>(T prefab, Vector3 pos, Quaternion rot, Transform parent, params object[] parameters) where T : Object;
+#endif
 	}
 }
-#endif
