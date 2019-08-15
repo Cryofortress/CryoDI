@@ -9,22 +9,22 @@ using CryoDI;
 
 public class GameMain : UnityStarter
 {
-	protected override void SetupContainer(CryoContainer container)
-	{
-		container.RegisterSingleton<GameState>(LifeTime.Global);
-		container.RegisterSingleton<ITankDatabase, DemoTankDatabase>(LifeTime.Global);
+    protected override void SetupContainer(CryoContainer container)
+    {
+        container.RegisterSingleton<GameState>(LifeTime.Global);
+        container.RegisterSingleton<ITankDatabase, DemoTankDatabase>(LifeTime.Global);
 
-		container.RegisterSingleton<CombatModel>(LifeTime.Scene);
-		container.RegisterSingleton<ICombatModel>(() => container.Resolve<CombatModel>(), LifeTime.Scene);
+        container.RegisterSingleton<CombatModel>(LifeTime.Scene);
+        container.RegisterSingleton<ICombatModel>(() => container.Resolve<CombatModel>(), LifeTime.Scene);
 
-		container.RegisterSceneObject<IWindowManager>("GlobalCanvas", "GlobalCanvas", LifeTime.Global);
-		container.RegisterSceneObject<IWindowManager>("CombatCanvas", "CombatUI", LifeTime.Scene);
-		container.RegisterSceneObject<Camera>("Main Camera", LifeTime.Scene);
+        container.RegisterSceneObject<IWindowManager>("GlobalCanvas", "GlobalCanvas", LifeTime.Global);
+        container.RegisterSceneObject<IWindowManager>("CombatCanvas", "CombatUI", LifeTime.Scene);
+        container.RegisterSceneObject<Camera>("Main Camera", LifeTime.Scene);
 
-		container.RegisterType<IPassiveAbility, Immunity>("Immunity", LifeTime.Scene);
-		container.RegisterType<IPassiveAbility, CounterAttack>("Counterattack", LifeTime.Scene);
-		container.RegisterType<IBot, Bot>(LifeTime.Scene);						
-	}
+        container.RegisterType<IPassiveAbility, Immunity>("Immunity", LifeTime.Scene);
+        container.RegisterType<IPassiveAbility, CounterAttack>("Counterattack", LifeTime.Scene);
+        container.RegisterType<IBot, Bot>(LifeTime.Scene);						
+    }
 }
 ```
 
@@ -34,10 +34,10 @@ using CryoDI;
 
 public class Target : CryoBehaviour
 {
-		[Dependency]
-		private Camera Camera { get; set; }
+    [Dependency]
+    private Camera Camera { get; set; }
 
-		// use Camera here
+    // use Camera here
 }
 ```
 
