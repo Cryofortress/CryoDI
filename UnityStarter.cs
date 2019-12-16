@@ -6,7 +6,7 @@ namespace CryoDI
 	/// <summary>
 	/// Класс, предназначенный для создания и настройки контейнера в Unity
 	/// </summary>
-	public class UnityStarter : MonoBehaviour, IInternalContainerBuidler
+	public abstract class UnityStarter : MonoBehaviour, IInternalContainerBuidler
 	{
 		private static UnityStarter _instance;
 		private CryoContainer _container;
@@ -31,13 +31,11 @@ namespace CryoDI
 		{
 			return new CryoContainer();
 		}
-		
+
 		/// <summary>
 		/// Override this method to customize containers content
 		/// </summary>
-		protected virtual void SetupContainer(CryoContainer container)
-		{
-		}
+		protected abstract void SetupContainer(CryoContainer container);
 		
 		void IInternalContainerBuidler.CreateRootContainer()
 		{

@@ -1,5 +1,6 @@
 ﻿using System;
 using CryoDI.Providers;
+using UnityEngine;
 
 namespace CryoDI
 {
@@ -213,6 +214,30 @@ namespace CryoDI
 		public static CryoContainer RegisterSceneObject<TBase, TDerived>(this CryoContainer container, LifeTime lifeTime) where TDerived : UnityEngine.Object, TBase
 		{
 			return container.RegisterProvider<TBase>(new FindObjectProvider<TDerived>(lifeTime), null);
+		}
+
+		public static CryoContainer RegisterComponent<T>(this CryoContainer container, FindComponentHint hint = FindComponentHint.ThisGameObject, string name = null, LifeTime lifeTime = LifeTime.Global)
+			where T : Component
+		{
+			return container.RegisterProvider<T>(new GetComponentProvider<T>(hint, lifeTime), name);
+		}
+
+		public static CryoContainer RegisterComponent<T>(this CryoContainer container, FindComponentHint hint, LifeTime lifeTime = LifeTime.Global)
+			where T : Component
+		{
+			return container.RegisterProvider<T>(new GetComponentProvider<T>(hint, lifeTime), null);
+		}
+
+		public static CryoContainer RegisterComponent<T>(this CryoContainer container, string name, LifeTime lifeTime = LifeTime.Global)
+			where T : Component
+		{
+			return container.RegisterProvider<T>(new GetComponentProvider<T>(FindComponentHint.ThisGameObject, lifeTime), name);
+		}
+
+		public static CryoContainer RegisterComponent<T>(this CryoContainer container, LifeTime lifeTime)
+			where T : Component
+		{
+			return container.RegisterProvider<T>(new GetComponentProvider<T>(FindComponentHint.ThisGameObject, lifeTime), null);
 		}
 #endif
 		#endregion SceneObject

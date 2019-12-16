@@ -1,5 +1,7 @@
-#if UNITY_5_3_OR_NEWER
 using UnityEngine;
+using Object = UnityEngine.Object;
+#if UNITY_5_3_OR_NEWER
+using System;
 
 namespace CryoDI.Providers
 {
@@ -12,22 +14,20 @@ namespace CryoDI.Providers
 			LifeTime = lifeTime;
 		}
 
-		public LifeTime LifeTime { get; private set; }
+		public LifeTime LifeTime { get; }
 
-		public object GetObject(CryoContainer container, params object[] parameters)
+		public object GetObject(object owner, CryoContainer container, params object[] parameters)
 		{
 			if (IsDestroyed())
 			{
 				_cached = FindObject();
 
 				var cryoBehaviour = _cached as CryoBehaviour;
-				if (cryoBehaviour != null && !cryoBehaviour.BuiltUp)
-				{
-					cryoBehaviour.BuildUp();
-				}
+				if (cryoBehaviour != null && !cryoBehaviour.BuiltUp) cryoBehaviour.BuildUp();
 
 				LifeTimeManager.TryToAdd(this, LifeTime);
 			}
+
 			return _cached;
 		}
 
@@ -40,13 +40,11 @@ namespace CryoDI.Providers
 					return null;
 
 				var cryoBehaviour = _cached as CryoBehaviour;
-				if (cryoBehaviour != null && !cryoBehaviour.BuiltUp)
-				{
-					cryoBehaviour.BuildUp();
-				}
+				if (cryoBehaviour != null && !cryoBehaviour.BuiltUp) cryoBehaviour.BuildUp();
 
 				LifeTimeManager.TryToAdd(this, LifeTime);
 			}
+
 			return _cached;
 		}
 
@@ -54,11 +52,12 @@ namespace CryoDI.Providers
 		{
 			if (LifeTime != LifeTime.External)
 			{
-				System.IDisposable disposable;
-				if (_cached != null && (disposable = _cached as System.IDisposable) != null)
+				IDisposable disposable;
+				if (_cached != null && (disposable = _cached as IDisposable) != null)
 					disposable.Dispose();
 			}
-			_cached = default (T);
+
+			_cached = default;
 		}
 
 		private bool IsDestroyed()
@@ -68,15 +67,12 @@ namespace CryoDI.Providers
 
 			if (typeof(T) == typeof(GameObject))
 			{
-				GameObject gameObj = (GameObject) (object)_cached;
+				var gameObj = (GameObject) (object) _cached;
 				return !gameObj;
 			}
 
 			var component = _cached as Component;
-			if (component)
-			{
-				return !component.gameObject;
-			}
+			if (component) return !component.gameObject;
 
 			return true;
 		}
@@ -85,7 +81,7 @@ namespace CryoDI.Providers
 		{
 			var obj = Object.FindObjectOfType<T>();
 			if (obj == null)
-				throw new ContainerException("Can't find object of type \"" +typeof(T) + "\"");
+				throw new ContainerException("Can't find object of type \"" + typeof(T) + "\"");
 
 			return obj;
 		}
