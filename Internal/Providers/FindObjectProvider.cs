@@ -1,7 +1,7 @@
 using UnityEngine;
-using Object = UnityEngine.Object;
 #if UNITY_5_3_OR_NEWER
 using System;
+using Object = UnityEngine.Object;
 
 namespace CryoDI.Providers
 {
@@ -22,8 +22,17 @@ namespace CryoDI.Providers
 			{
 				_cached = FindObject();
 
-				var cryoBehaviour = _cached as CryoBehaviour;
-				if (cryoBehaviour != null && !cryoBehaviour.BuiltUp) cryoBehaviour.BuildUp();
+				if (_cached is CryoBehaviour cryoBehaviour)
+				{
+					if (!cryoBehaviour.BuiltUp)
+						cryoBehaviour.BuildUp();
+				}
+				else if (_cached is Component component)
+				{
+					var cryoBuilder = component.GetComponent<CryoBuilder>();
+					if (cryoBuilder != null && !cryoBuilder.BuiltUp)
+						cryoBuilder.BuildUp();
+				}
 
 				LifeTimeManager.TryToAdd(this, LifeTime);
 			}

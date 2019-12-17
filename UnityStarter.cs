@@ -42,6 +42,7 @@ namespace CryoDI
 			_container = CreateContainer();
 			SetupContainer(_container);
 			CryoBehaviour.SetRootContainer(_container);
+			CryoBuilder.SetRootContainer(_container);
 		}
 
 		private void Awake()
