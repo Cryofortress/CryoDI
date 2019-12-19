@@ -55,7 +55,7 @@ namespace CryoDI.Providers
 					disposable.Dispose();
 			}
 
-			_instance = default;
+			_instance = default(T);
 			_exist = false;
 		}
 	}

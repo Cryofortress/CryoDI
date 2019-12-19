@@ -37,7 +37,7 @@ namespace CryoDI.Providers
 			var disposable = _instance as IDisposable;
 			if (disposable != null)
 				disposable.Dispose();
-			_instance = default;
+			_instance = default(T);
 			_disposed = true;
 		}
 	}

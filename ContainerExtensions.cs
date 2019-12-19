@@ -1,6 +1,8 @@
 ﻿using System;
 using CryoDI.Providers;
+#if UNITY_5_3_OR_NEWER
 using UnityEngine;
+#endif
 
 namespace CryoDI
 {
@@ -193,9 +195,10 @@ namespace CryoDI
 			return container.RegisterProvider<TBase>(new InstanceProvider<TDerived>(obj, lifeTime), null);
 		}
 		#endregion Instance
-		
-		#region SceneObject
+
 #if UNITY_5_3_OR_NEWER
+
+		#region SceneObject
 		public static CryoContainer RegisterSceneObject<T>(this CryoContainer container, string path, string name = null, LifeTime lifeTime = LifeTime.Global)
 		{
 			return container.RegisterProvider<T>(new ScenePathProvider<T>(path, lifeTime), name);
@@ -239,8 +242,9 @@ namespace CryoDI
 		{
 			return container.RegisterProvider<T>(new GetComponentProvider<T>(FindComponentHint.ThisGameObject, lifeTime), null);
 		}
-#endif
 		#endregion SceneObject
+
+#endif
 
 	}
 }
