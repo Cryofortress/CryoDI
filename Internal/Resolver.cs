@@ -20,6 +20,16 @@
 		{
 			return _container.ResolveByName<T>(name, parameters);
 		}
-		
+
+		public bool CanResolve()
+		{
+			return _container.IsRegistered<T>();
+		}
+
+		public bool CanResolveByName(string name)
+		{
+			_container.IsRegistered<T>();
+			return _container.IsRegistered<T>(name);
+		}
 	}
 }
