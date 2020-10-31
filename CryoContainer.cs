@@ -12,20 +12,28 @@ namespace CryoDI
 	/// </summary>
 	public class CryoContainer : IDisposable
 	{
-		private readonly Dictionary<ContainerKey, IObjectProvider> _providers = new Dictionary<ContainerKey, IObjectProvider>();
+		private readonly Dictionary<ContainerKey, IObjectProvider> _providers =
+			new Dictionary<ContainerKey, IObjectProvider>();
+
 		private readonly BuildUpStack _buildUpStack = new BuildUpStack();
 		private readonly LifeTimeStack _lifetimeStack = new LifeTimeStack();
-		
+
 		public Reaction OnLifetimeError
 		{
 			get { return _lifetimeStack.OnLifetimeError; }
 			set { _lifetimeStack.OnLifetimeError = value; }
 		}
-		
+
 		public Reaction OnCircularDependency
 		{
 			get { return _buildUpStack.OnCircularDependency; }
 			set { _buildUpStack.OnCircularDependency = value; }
+		}
+
+		public void Dispose()
+		{
+			_providers.Clear();
+			LifeTimeManager.DisposeAll();
 		}
 
 		/// <summary>
@@ -33,44 +41,44 @@ namespace CryoDI
 		/// </summary>
 		public virtual bool IsRegistered<T>(string name = null)
 		{
-			return (ResolveProvider(typeof (T), name) != null);
-		} 
-		
-	    public CryoContainer RegisterProvider<T>(IObjectProvider provider, string name = null)
+			return (ResolveProvider(typeof(T), name) != null);
+		}
+
+		public CryoContainer RegisterProvider<T>(IObjectProvider provider, string name = null)
 		{
-			var key = new ContainerKey(typeof (T), name);
+			var key = new ContainerKey(typeof(T), name);
 			_providers[key] = provider;
 			return this;
 		}
 
-	    /// <summary>
-	    /// Получить объект нужного типа
-	    /// </summary>
-	    public T Resolve<T>(params object[] parameters)
-	    {
-		    return (T) ResolveByName(typeof (T), null, parameters);
-	    }
+		/// <summary>
+		/// Получить объект нужного типа
+		/// </summary>
+		public T Resolve<T>(params object[] parameters)
+		{
+			return (T) ResolveByName(typeof(T), null, parameters);
+		}
 
-	    /// <summary>
-	    /// Получить объект нужного типа
-	    /// </summary>
-	    public object Resolve(Type type, params object[] parameters)
-	    {
-		    return ResolveByName(type, null, parameters);
-	    }
+		/// <summary>
+		/// Получить объект нужного типа
+		/// </summary>
+		public object Resolve(Type type, params object[] parameters)
+		{
+			return ResolveByName(type, null, parameters);
+		}
 
 		/// <summary>
 		/// Получить объект нужного типа
 		/// </summary>
 		public T ResolveByName<T>(string name, params object[] parameters)
 		{
-			return (T) ResolveByName(typeof (T), name, parameters);
+			return (T) ResolveByName(typeof(T), name, parameters);
 		}
 
 		/// <summary>
 		/// Получить объект нужного типа
 		/// </summary>
-		public object ResolveByName(Type type, string name, params object[] parameters)
+		public virtual object ResolveByName(Type type, string name, params object[] parameters)
 		{
 			return ResolveByNameFor(null, type, name, parameters);
 		}
@@ -78,57 +86,56 @@ namespace CryoDI
 		/// <summary>
 		/// Попытаться получить объект нужного типа. Если объекта нет, то возвращет null не кидая исключения.
 		/// </summary>
-		public T WeakResolve<T>(params object[] parameters)
+		public virtual T TryResolve<T>(params object[] parameters)
 		{
-			return (T) WeakResolveByName(typeof (T), null, parameters);
+			return (T) TryResolveByName(typeof(T), null, parameters);
 		}
 
 		/// <summary>
 		/// Попытаться получить объект нужного типа. Если объекта нет, то возвращет null не кидая исключения.
 		/// </summary>
-		public object WeakResolve(Type type, params object[] parameters)
+		public virtual object TryResolve(Type type, params object[] parameters)
 		{
-			return WeakResolveByName(type, null, parameters);
+			return TryResolveByName(type, null, parameters);
 		}
 
 		/// <summary>
 		/// Попытаться получить объект нужного типа. Если объекта нет, то возвращет null не кидая исключения.
 		/// </summary>
-		public T WeakResolveByName<T>(string name, params object[] parameters)
+		public virtual T TryResolveByName<T>(string name, params object[] parameters)
 		{
-			return (T) WeakResolveByName(typeof (T), name, parameters);
+			return (T) TryResolveByName(typeof(T), name, parameters);
 		}
 
 		/// <summary>
 		/// Попытаться получить объект нужного типа. Если объекта нет, то возвращет null не кидая исключения.
 		/// </summary>
-		public object WeakResolveByName(Type type, string name, params object[] parameters)
+		public virtual object TryResolveByName(Type type, string name, params object[] parameters)
 		{
-			ContainerKey key;
-			IObjectProvider provider = ResolveProvider(type, name, out key);
+			IObjectProvider provider = ResolveProvider(type, name, out var key);
 			if (provider == null)
-				throw new ContainerException("Can't resolve type " + type.FullName +
-				                             (name == null ? "" : " registered with name \"" + name + "\""));
+				return null;
 
 			_lifetimeStack.Push(key, provider.LifeTime);
 			var obj = provider.WeakGetObject(this, parameters);
-			_buildUpStack.CheckCircularDependency(obj);
+			if (obj != null)
+				_buildUpStack.CheckCircularDependency(obj);
 			_lifetimeStack.Pop();
 			return obj;
 		}
 
 		/// <summary>
-	    /// Заинжектить зависимости в уже существующий объект
-	    /// </summary>
-	    public void BuildUp(object obj, params object[] parameters)
-	    {
-		    _buildUpStack.PushObject(obj);
+		/// Заинжектить зависимости в уже существующий объект
+		/// </summary>
+		public void BuildUp(object obj, params object[] parameters)
+		{
+			_buildUpStack.PushObject(obj);
 
 			BuildUp(obj.GetType(), obj, parameters);
 			PostBuildUp(obj);
 			_buildUpStack.Pop();
-	    }
-		
+		}
+
 		public T BuildUp<T>(T obj, params object[] parameters)
 		{
 			BuildUp((object) obj, parameters);
@@ -143,12 +150,12 @@ namespace CryoDI
 		private Param[] ConvertParameters(object[] parameters)
 		{
 			var ret = new Param[parameters.Length];
-			for(int i = 0; i < parameters.Length; ++i)
+			for (int i = 0; i < parameters.Length; ++i)
 			{
 				var param = parameters[i] as Param;
 				if (param == null)
 					param = new Param(parameters[i]);
-				
+
 				ret[i] = param;
 			}
 
@@ -159,25 +166,29 @@ namespace CryoDI
 		{
 			if (type.BaseType != typeof(object))
 				BuildUp(type.BaseType, obj, parameters);
-			
+
 #if NETFX_CORE
 			IEnumerable<MemberInfo> members =
 				type.GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.SetProperty | BindingFlags.Public | BindingFlags.Instance);
 #else
-			var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
-			
+			var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic |
+			                                    BindingFlags.DeclaredOnly);
+
 #endif
 
 			foreach (PropertyInfo property in properties)
 			{
-				var dependencyAttr = property.GetCustomAttributes(typeof(DependencyAttribute), true).FirstOrDefault() as DependencyAttribute;
+				var dependencyAttr =
+					property.GetCustomAttributes(typeof(DependencyAttribute), true).FirstOrDefault() as
+						DependencyAttribute;
 				if (dependencyAttr != null)
 				{
 					ProcessDependency(type, obj, property, dependencyAttr.Name);
 					continue;
 				}
-				
-				var paramAttribute = property.GetCustomAttributes(typeof(ParamAttribute), true).FirstOrDefault() as ParamAttribute;
+
+				var paramAttribute =
+					property.GetCustomAttributes(typeof(ParamAttribute), true).FirstOrDefault() as ParamAttribute;
 				if (paramAttribute != null)
 				{
 					ProcessParam(type, obj, property, parameters);
@@ -186,7 +197,7 @@ namespace CryoDI
 		}
 
 		private void ProcessParam(Type type, object obj, PropertyInfo propertyInfo, IEnumerable<Param> parameters)
-		{	
+		{
 			object valueObj;
 
 			_buildUpStack.SetPropertyName(propertyInfo.Name);
@@ -201,7 +212,8 @@ namespace CryoDI
 			}
 			catch (Exception ex)
 			{
-				throw new ContainerException(ex.Message + " while resolving " + type.FullName + ":" + propertyInfo.Name, ex);
+				throw new ContainerException(ex.Message + " while resolving " + type.FullName + ":" + propertyInfo.Name,
+					ex);
 			}
 
 			var setter = propertyInfo.GetSetMethod(true);
@@ -211,10 +223,9 @@ namespace CryoDI
 
 		private object FindParameter(PropertyInfo propertyInfo, IEnumerable<Param> parameters)
 		{
-			
 			var propertyName = propertyInfo.Name;
 			Type propertyType = propertyInfo.PropertyType;
-			
+
 			var param = parameters.FirstOrDefault(p => p.Name == propertyName);
 			if (param != null)
 			{
@@ -222,7 +233,7 @@ namespace CryoDI
 					throw new ContainerException("Parameter value can't be assigned");
 				return param.Value;
 			}
-			
+
 			foreach (var parameter in parameters)
 			{
 				if (parameter.Name == null && propertyType.IsInstanceOfType(parameter.Value))
@@ -232,7 +243,7 @@ namespace CryoDI
 					param = parameter;
 				}
 			}
-			
+
 			if (param != null)
 				return param.Value;
 
@@ -253,7 +264,8 @@ namespace CryoDI
 				{
 					valueObj = CreateResolver(propertyType, attribName);
 				}
-				else if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(IWeakResolver<>))
+				else if (propertyType.IsGenericType &&
+				         propertyType.GetGenericTypeDefinition() == typeof(IWeakResolver<>))
 				{
 					valueObj = CreateWeakResolver(propertyType, attribName);
 				}
@@ -261,10 +273,12 @@ namespace CryoDI
 				{
 					valueObj = CreateBuilder(propertyType);
 				}
+#if UNITY_5_3_OR_NEWER
 				else if (propertyType == typeof(IPrefabInstantiator))
 				{
 					valueObj = CreatePrefabInstantiator();
 				}
+#endif
 				else
 					valueObj = ResolveByNameFor(obj, propertyType, attribName);
 			}
@@ -282,7 +296,8 @@ namespace CryoDI
 			}
 			catch (Exception ex)
 			{
-				throw new ContainerException(ex.Message + " while resolving " + type.FullName + ":" + propertyInfo.Name, ex);
+				throw new ContainerException(ex.Message + " while resolving " + type.FullName + ":" + propertyInfo.Name,
+					ex);
 			}
 
 			var setter = propertyInfo.GetSetMethod(true);
@@ -295,7 +310,6 @@ namespace CryoDI
 		/// </summary>
 		protected virtual void PostBuildUp(object obj)
 		{
-			
 		}
 
 		private object CreateResolver(Type propertyType, string name)
@@ -311,18 +325,20 @@ namespace CryoDI
 			var resolverType = typeof(WeakResolver<>).MakeGenericType(args);
 			return Activator.CreateInstance(resolverType, name, this);
 		}
-		
+
 		private object CreateBuilder(Type propertyType)
 		{
 			var args = propertyType.GetGenericArguments();
 			var resolverType = typeof(Builder<>).MakeGenericType(args);
 			return Activator.CreateInstance(resolverType, this);
 		}
-		
+
+#if UNITY_5_3_OR_NEWER
 		private object CreatePrefabInstantiator()
 		{
 			return new PrefabInstantiator(this);
 		}
+#endif
 
 		private object ResolveByNameFor(object owner, Type type, string name, params object[] parameters)
 		{
@@ -337,12 +353,6 @@ namespace CryoDI
 			_buildUpStack.CheckCircularDependency(obj);
 			_lifetimeStack.Pop();
 			return obj;
-		}
-
-		public void Dispose()
-		{
-			_providers.Clear();
-			LifeTimeManager.DisposeAll();
 		}
 
 		private IObjectProvider ResolveProvider(Type type, string name, out ContainerKey key)

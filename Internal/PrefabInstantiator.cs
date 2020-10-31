@@ -1,6 +1,5 @@
 #if UNITY_5_3_OR_NEWER
 using UnityEngine;
-#endif
 
 namespace CryoDI
 {
@@ -13,7 +12,6 @@ namespace CryoDI
 			_container = container;
 		}
 		
-#if UNITY_5_3_OR_NEWER
 		public Object Instantiate(Object prefab, params object[] parameters)
 		{
 			var instance = Object.Instantiate(prefab);
@@ -110,6 +108,6 @@ namespace CryoDI
 				_container.BuildUp(monoBehaviour, parameters);
 			}
 		}
-#endif
 	}
 }
+#endif

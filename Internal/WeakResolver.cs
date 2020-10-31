@@ -13,12 +13,12 @@ namespace CryoDI
 
 		public T Resolve(params object[] parameters)
 		{
-			return _container.WeakResolveByName<T>(_name, parameters);
+			return _container.TryResolveByName<T>(_name, parameters);
 		}
 		
 		public T ResolveByName(string name, params object[] parameters)
 		{
-			return _container.WeakResolveByName<T>(name, parameters);
+			return _container.TryResolveByName<T>(name, parameters);
 		}
 	}
 }
