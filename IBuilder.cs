@@ -1,7 +1,7 @@
 ﻿namespace CryoDI
 {
-	public interface IBuilder<in T>
+	public interface IBuilder<T>
 	{
-		void BuildUp(T obj, params object[] parameters);
+		T BuildUp(T obj, params object[] parameters);
 	}
 }

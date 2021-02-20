@@ -9,9 +9,10 @@
 			_container = container;
 		}
 		
-		public void BuildUp(T obj, params object[] parameters)
+		public T BuildUp(T obj, params object[] parameters)
 		{
 			_container.BuildUp(obj, parameters);
+			return obj;
 		}
 	}
 }
