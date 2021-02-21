@@ -1,7 +1,6 @@
 using System;
-using CryoDI;
 
-namespace DefaultNamespace
+namespace CryoDI
 {
 	public class CircularDependencyException : ContainerException
 	{
