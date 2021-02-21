@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace CryoDI.Providers
 {
+	/// <summary>
+	/// Провайдер, который ищет в сцене объекты по пути
+	/// </summary>
 	internal class ScenePathProvider<T> : IObjectProvider
 	{
 		private readonly string _path;
@@ -91,7 +94,7 @@ namespace CryoDI.Providers
 		{
 			var gameObject = new MaskFinder().Find(_path);
 			if (gameObject == null)
-				throw new ContainerException("Can't find game object \"" + _path + "\"");
+				throw new ContainerException("Can't find game object with path \"" + _path + "\"");
 
 			if (typeof(T) == typeof(GameObject))
 				return (T) (object) gameObject;

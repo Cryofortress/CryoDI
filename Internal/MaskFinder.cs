@@ -81,7 +81,7 @@ namespace CryoDI
 					childTransform = transform.Find(name);
 				}
 				if (childTransform == null)
-					throw new ContainerException("Can't find game object \"" + GetFullPath(transform) + PathSeparator + name + "\"");
+					throw new ContainerException("Can't find game object at \"" + GetFullPath(transform) + PathSeparator + name + "\"");
 				transform = childTransform;
 			}
 			return transform.gameObject;
@@ -112,7 +112,7 @@ namespace CryoDI
 		{
 			var node = FindObjectRecursively(go => go.transform.parent == null && go.name == name);
 			if (node == null)
-				throw new ContainerException("Can't find game object \"" + PathSeparator + name + "\"");
+				throw new ContainerException("Can't find root game object \"" + PathSeparator + name + "\"");
 			return node;
 		}
 
