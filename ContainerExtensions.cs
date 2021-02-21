@@ -211,12 +211,12 @@ namespace CryoDI
 		
 		public static CryoContainer RegisterSceneObject<T>(this CryoContainer container, LifeTime lifeTime) where T : UnityEngine.Object
 		{
-			return container.RegisterProvider<T>(new FindObjectProvider<T>(lifeTime), null);
+			return container.RegisterProvider<T>(new FindObjectOfTypeProvider<T>(lifeTime), null);
 		}
 		
 		public static CryoContainer RegisterSceneObject<TBase, TDerived>(this CryoContainer container, LifeTime lifeTime) where TDerived : UnityEngine.Object, TBase
 		{
-			return container.RegisterProvider<TBase>(new FindObjectProvider<TDerived>(lifeTime), null);
+			return container.RegisterProvider<TBase>(new FindObjectOfTypeProvider<TDerived>(lifeTime), null);
 		}
 
 		public static CryoContainer RegisterComponent<T>(this CryoContainer container, FindComponentHint hint = FindComponentHint.ThisGameObject, string name = null, LifeTime lifeTime = LifeTime.Global)

@@ -5,11 +5,14 @@ using Object = UnityEngine.Object;
 
 namespace CryoDI.Providers
 {
-	public class FindObjectProvider<T> : IObjectProvider where T : Object
+	/// <summary>
+	/// Провайдер для поиска объектов в сцене, который использует UnityEngine.Object.FindObjectOfType()
+	/// </summary>
+	public class FindObjectOfTypeProvider<T> : IObjectProvider where T : Object
 	{
 		private T _cached;
 
-		public FindObjectProvider(LifeTime lifeTime)
+		public FindObjectOfTypeProvider(LifeTime lifeTime)
 		{
 			LifeTime = lifeTime;
 		}
