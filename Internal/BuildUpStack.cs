@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
-using DefaultNamespace;
 
 namespace CryoDI
 {
@@ -127,14 +127,28 @@ namespace CryoDI
 			_initializables = new List<IInitializable>();
 			foreach (var initializable in initializables)
 			{
-				initializable.Initialize();
+				try
+				{
+					initializable.Initialize();
+				}
+				catch (Exception ex)
+				{
+					DILog.LogError("Exception in Initialize: " + ex);
+				}
 			}
 			
 			var lateInitializables = _lateInitializables;
 			_lateInitializables = new List<ILateInitializable>();
 			foreach (var lateInitializable in lateInitializables)
 			{
-				lateInitializable.LateInitialize();
+				try
+				{
+					lateInitializable.LateInitialize();
+				}
+				catch (Exception ex)
+				{
+					DILog.LogError("Exception in LateInitialize: " + ex);
+				}
 			}
 		}
 	}

@@ -1,9 +1,8 @@
-﻿#if UNITY_EDITOR
+﻿using NUnit.Framework;
 
-using CryoDI;
-using DefaultNamespace;
-using UnityEngine;
-using NUnit.Framework;
+#if UNITY_EDITOR
+using UnityEngine.TestTools;
+#endif
 
 namespace CryoDI.Tests
 {
@@ -38,10 +37,6 @@ namespace CryoDI.Tests
 			BackRef = ClassA.ClassB;
 		}
 	}
-
-	
-
-	
 
 	[TestFixture]
 	public class TestCrossDependency
@@ -91,6 +86,9 @@ namespace CryoDI.Tests
 		[Test]
 		public void ExceptionThrown()
 		{
+#if UNITY_EDITOR
+			LogAssert.ignoreFailingMessages = true;
+#endif
 			var container = new CryoContainer {OnCircularDependency = Reaction.ThrowException};
 			container.RegisterSingleton<ClassA>();
 			container.RegisterSingleton<ClassB>();
@@ -193,5 +191,3 @@ namespace CryoDI.Tests
 		}
 	}
 }
-
-#endif

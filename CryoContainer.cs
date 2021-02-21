@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using CryoDI.Providers;
-using DefaultNamespace;
 
 namespace CryoDI
 {
@@ -131,9 +130,15 @@ namespace CryoDI
 		{
 			_buildUpStack.PushObject(obj);
 
-			BuildUp(obj.GetType(), obj, parameters);
-			PostBuildUp(obj);
-			_buildUpStack.Pop();
+			try
+			{
+				BuildUp(obj.GetType(), obj, parameters);
+				PostBuildUp(obj);
+			}
+			finally
+			{
+				_buildUpStack.Pop();
+			}
 		}
 
 		public T BuildUp<T>(T obj, params object[] parameters)
