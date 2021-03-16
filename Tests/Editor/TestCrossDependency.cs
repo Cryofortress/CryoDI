@@ -44,7 +44,7 @@ namespace CryoDI.Tests
 		[Test]
 		public void RefResolved()
 		{
-			var container = new CryoContainer {OnCircularDependency = Reaction.LogWarning};
+			var container = new CryoContainer {CircularDependencyReaction = Reaction.LogWarning};
 			container.RegisterSingleton<ClassA>();
 			container.RegisterSingleton<ClassB>();
 
@@ -58,7 +58,7 @@ namespace CryoDI.Tests
 		[Test]
 		public void InitializeCalled()
 		{
-			var container = new CryoContainer {OnCircularDependency = Reaction.LogWarning};
+			var container = new CryoContainer {CircularDependencyReaction = Reaction.LogWarning};
 			container.RegisterSingleton<ClassA>();
 			container.RegisterSingleton<ClassB>();
 
@@ -70,7 +70,7 @@ namespace CryoDI.Tests
 		[Test]
 		public void RefSet()
 		{
-			var container = new CryoContainer {OnCircularDependency = Reaction.LogWarning};
+			var container = new CryoContainer {CircularDependencyReaction = Reaction.LogWarning};
 			container.RegisterSingleton<ClassA>();
 			container.RegisterSingleton<ClassB>();
 
@@ -89,7 +89,7 @@ namespace CryoDI.Tests
 #if UNITY_EDITOR
 			LogAssert.ignoreFailingMessages = true;
 #endif
-			var container = new CryoContainer {OnCircularDependency = Reaction.ThrowException};
+			var container = new CryoContainer {CircularDependencyReaction = Reaction.ThrowException};
 			container.RegisterSingleton<ClassA>();
 			container.RegisterSingleton<ClassB>();
 
@@ -113,7 +113,7 @@ namespace CryoDI.Tests
 		[Test]
 		public void SelfReference()
 		{
-			var container = new CryoContainer {OnCircularDependency = Reaction.LogWarning};
+			var container = new CryoContainer {CircularDependencyReaction = Reaction.LogWarning};
 			container.RegisterSingleton<ClassC>();
 			container.Resolve<ClassC>();
 		}
@@ -121,7 +121,7 @@ namespace CryoDI.Tests
 		[Test]
 		public void SelfReferenceThrow()
 		{
-			var container = new CryoContainer {OnCircularDependency = Reaction.ThrowException};
+			var container = new CryoContainer {CircularDependencyReaction = Reaction.ThrowException};
 			container.RegisterSingleton<ClassC>();
 
 			try
@@ -162,7 +162,7 @@ namespace CryoDI.Tests
 		[Test]
 		public void LongChain()
 		{
-			var container = new CryoContainer {OnCircularDependency = Reaction.LogWarning};
+			var container = new CryoContainer {CircularDependencyReaction = Reaction.LogWarning};
 			container.RegisterSingleton<Class1>();
 			container.RegisterSingleton<Class2>();
 			container.RegisterSingleton<Class3>();
@@ -173,7 +173,7 @@ namespace CryoDI.Tests
 		[Test]
 		public void LongChainThrow()
 		{
-			var container = new CryoContainer {OnCircularDependency = Reaction.ThrowException};
+			var container = new CryoContainer {CircularDependencyReaction = Reaction.ThrowException};
 			container.RegisterSingleton<Class1>();
 			container.RegisterSingleton<Class2>();
 			container.RegisterSingleton<Class3>();

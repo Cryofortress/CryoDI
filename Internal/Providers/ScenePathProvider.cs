@@ -11,11 +11,13 @@ namespace CryoDI.Providers
 	internal class ScenePathProvider<T> : IObjectProvider
 	{
 		private readonly string _path;
+		private readonly ILifeTimeManager _lifeTimeManager;
 		private T _cached;
 
-		public ScenePathProvider(string path, LifeTime lifeTime)
+		public ScenePathProvider(string path, ILifeTimeManager lifeTimeManager, LifeTime lifeTime)
 		{
 			_path = path;
+			_lifeTimeManager = lifeTimeManager;
 			LifeTime = lifeTime;
 		}
 
@@ -39,7 +41,7 @@ namespace CryoDI.Providers
 						cryoBuilder.BuildUp();
 				}
 
-				LifeTimeManager.TryToAdd(this, LifeTime);
+				_lifeTimeManager.Add(this, LifeTime);
 			}
 
 			return _cached;
@@ -55,7 +57,7 @@ namespace CryoDI.Providers
 				var cryoBehaviour = _cached as CryoBehaviour;
 				if (cryoBehaviour != null && !cryoBehaviour.BuiltUp) cryoBehaviour.BuildUp();
 
-				LifeTimeManager.TryToAdd(this, LifeTime);
+				_lifeTimeManager.Add(this, LifeTime);
 			}
 
 			return _cached;

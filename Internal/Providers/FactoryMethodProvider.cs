@@ -5,16 +5,17 @@ namespace CryoDI.Providers
 	internal class FactoryMethodProvider<T> : IObjectProvider
 	{
 		private readonly Func<T> _factoryMethod;
+		private readonly ILifeTimeManager _lifeTimeManager;
 
-		public FactoryMethodProvider(LifeTime lifeTime)
+		public FactoryMethodProvider(ILifeTimeManager lifeTimeManager, LifeTime lifeTime)
+			: this(Activator.CreateInstance<T>, lifeTimeManager, lifeTime)
 		{
-			LifeTime = lifeTime;
-			_factoryMethod = Activator.CreateInstance<T>;
 		}
 
-		public FactoryMethodProvider(Func<T> factoryMethod, LifeTime lifeTime)
+		public FactoryMethodProvider(Func<T> factoryMethod, ILifeTimeManager lifeTimeManager, LifeTime lifeTime)
 		{
 			LifeTime = lifeTime;
+			_lifeTimeManager = lifeTimeManager;
 			_factoryMethod = factoryMethod;
 		}
 
@@ -25,7 +26,8 @@ namespace CryoDI.Providers
 			var obj = _factoryMethod();
 			container.BuildUp(obj, parameters);
 
-			LifeTimeManager.TryToAdd(obj, LifeTime);
+			if (obj is IDisposable disposable)
+				_lifeTimeManager.Add(disposable, LifeTime);
 			return obj;
 		}
 

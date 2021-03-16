@@ -7,22 +7,19 @@ using UnityEngine.SceneManagement;
 
 namespace CryoDI
 {
-    internal static class LifeTimeManager
+    internal class LifeTimeManager : ILifeTimeManager
     {
-        private static readonly Dictionary<int, Entry> _entries = new Dictionary<int, Entry>();
-	    private static readonly List<IDisposable> _global = new List<IDisposable>();
+        private readonly Dictionary<int, Entry> _entries = new Dictionary<int, Entry>();
+	    private readonly List<IDisposable> _global = new List<IDisposable>();
 
-		static LifeTimeManager()
+		public LifeTimeManager()
 		{
 			SceneManager.sceneUnloaded += OnSceneUnloaded;
 		}
 
-        public static void TryToAdd(object obj, LifeTime lifeTime)
+        public void Add(IDisposable disposable, LifeTime lifeTime)
         {
 	        if (lifeTime == LifeTime.External) return;
-	        
-            var disposable = obj as IDisposable;
-	        if (disposable == null) return;
 	        
 	        if (lifeTime == LifeTime.Scene)
 		        AddSceneDisposable(disposable);
@@ -30,7 +27,7 @@ namespace CryoDI
 	        	_global.Add(disposable);
         }
 
-	    public static void DisposeAll()
+	    public void DisposeAll()
 	    {
 		    // среди этих списков может быть ссылка на сам контейнер. Поэтому создаем временную копию
 		    Entry[] entries = null;
@@ -58,17 +55,15 @@ namespace CryoDI
 		    }
 	    }
 
-	    private static void AddSceneDisposable(IDisposable disposable)
+	    private void AddSceneDisposable(IDisposable disposable)
 		{
 			var entry = GetCurEntry();
 			entry.Add(disposable);
-			//DILog.Log($"[LifetimeManager] Object {disposable.GetType()} was added for scene {entry.SceneName}");
 		}
 
-        private static Entry GetCurEntry()
+        private Entry GetCurEntry()
         {
 			var activeScene = SceneManager.GetActiveScene();
-			//DILog.Log("[LifetimeManager] Active scene: {activeScene.name} ({activeScene.handle})");
 
 			Entry entry;
 			if (!_entries.TryGetValue(activeScene.handle, out entry))
@@ -79,7 +74,7 @@ namespace CryoDI
             return entry;
         }
 
-	    private static void OnSceneUnloaded(Scene scene)
+	    private void OnSceneUnloaded(Scene scene)
         {
 			DILog.Log($"[LifetimeManager] Scene unloaded: {scene.name} ({scene.handle})");
 			if (_entries.TryGetValue(scene.handle, out var entry))
@@ -120,20 +115,19 @@ namespace CryoDI
 
 namespace CryoDI
 {
-	internal static class LifeTimeManager
+	internal class LifeTimeManager : ILifeTimeManager
 	{
-		private static readonly List<IDisposable> _global = new List<IDisposable>();
+		private readonly List<IDisposable> _global = new List<IDisposable>();
 
-		public static void TryToAdd(object obj, LifeTime lifeTime)
+		public void Add(IDisposable disposable, LifeTime lifeTime)
 		{
 			if (lifeTime == LifeTime.External) return;
 			
-			var disposable = obj as IDisposable;
 			if (disposable != null)
 				_global.Add(disposable);
 		}
 
-		public static void DisposeAll()
+		public void DisposeAll()
 		{
 			// среди этого списка может быть ссылка на сам контейнер. Поэтому создаем временную копию
 			var objectsToDispose = _global.ToArray();
