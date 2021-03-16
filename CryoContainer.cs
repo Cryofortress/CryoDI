@@ -16,23 +16,36 @@ namespace CryoDI
 
 		private readonly BuildUpStack _buildUpStack = new BuildUpStack();
 		private readonly LifeTimeStack _lifetimeStack = new LifeTimeStack();
+		private readonly LifeTimeManager _lifeTimeManager = new LifeTimeManager();
 
-		public Reaction OnLifetimeError
+		public Reaction LifetimeErrorReaction
 		{
-			get { return _lifetimeStack.OnLifetimeError; }
-			set { _lifetimeStack.OnLifetimeError = value; }
+			get { return _lifetimeStack.LifetimeErrorReaction; }
+			set { _lifetimeStack.LifetimeErrorReaction = value; }
 		}
 
-		public Reaction OnCircularDependency
+		public Reaction CircularDependencyReaction
 		{
-			get { return _buildUpStack.OnCircularDependency; }
-			set { _buildUpStack.OnCircularDependency = value; }
+			get { return _buildUpStack.CircularDependencyReaction; }
+			set { _buildUpStack.CircularDependencyReaction = value; }
+		}
+
+		public ILifeTimeManager LifeTimeManager
+		{
+			get { return _lifeTimeManager; }
 		}
 
 		public void Dispose()
 		{
 			_providers.Clear();
-			LifeTimeManager.DisposeAll();
+			_lifeTimeManager.DisposeAll();
+		}
+
+		public CryoContainer RegisterProvider<T>(IObjectProvider provider, string name = null)
+		{
+			var key = new ContainerKey(typeof(T), name);
+			_providers[key] = provider;
+			return this;
 		}
 
 		/// <summary>
@@ -41,13 +54,6 @@ namespace CryoDI
 		public virtual bool IsRegistered<T>(string name = null)
 		{
 			return (ResolveProvider(typeof(T), name) != null);
-		}
-
-		public CryoContainer RegisterProvider<T>(IObjectProvider provider, string name = null)
-		{
-			var key = new ContainerKey(typeof(T), name);
-			_providers[key] = provider;
-			return this;
 		}
 
 		/// <summary>

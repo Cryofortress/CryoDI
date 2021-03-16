@@ -7,12 +7,12 @@ namespace CryoDI.Providers
 		private bool _disposed;
 		private T _instance;
 
-		public InstanceProvider(T instance, LifeTime lifeTime)
+		public InstanceProvider(T instance, ILifeTimeManager lifeTimeManager, LifeTime lifeTime)
 		{
 			_instance = instance;
 			LifeTime = lifeTime;
 
-			LifeTimeManager.TryToAdd(this, LifeTime);
+			lifeTimeManager.Add(this, LifeTime);
 		}
 
 		public LifeTime LifeTime { get; }
@@ -34,8 +34,7 @@ namespace CryoDI.Providers
 		{
 			if (_disposed)
 				return;
-			var disposable = _instance as IDisposable;
-			if (disposable != null)
+			if (_instance is IDisposable disposable)
 				disposable.Dispose();
 			_instance = default(T);
 			_disposed = true;

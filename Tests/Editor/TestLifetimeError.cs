@@ -20,7 +20,7 @@ namespace CryoDI.Tests
 		[Test] 
 		public void GlobalInExternal()
 		{
-			var container = new CryoContainer {OnLifetimeError = Reaction.ThrowException};
+			var container = new CryoContainer {LifetimeErrorReaction = Reaction.ThrowException};
 			container.RegisterSingleton<MySingleton>(LifeTime.Global);
 			container.RegisterType<MyInstance>(LifeTime.External);
 			container.Resolve<MyInstance>();
@@ -29,7 +29,7 @@ namespace CryoDI.Tests
 		[Test] 
 		public void GlobalInGlobal()
 		{
-			var container = new CryoContainer {OnLifetimeError = Reaction.ThrowException};
+			var container = new CryoContainer {LifetimeErrorReaction = Reaction.ThrowException};
 			container.RegisterSingleton<MySingleton>(LifeTime.Global);
 			container.RegisterType<MyInstance>(LifeTime.Global);
 			container.Resolve<MyInstance>();
@@ -38,7 +38,7 @@ namespace CryoDI.Tests
 		[Test]
 		public void GlobalInScene()
 		{
-			var container = new CryoContainer {OnLifetimeError = Reaction.ThrowException};
+			var container = new CryoContainer {LifetimeErrorReaction = Reaction.ThrowException};
 			container.RegisterSingleton<MySingleton>(LifeTime.Global);
 			container.RegisterType<MyInstance>(LifeTime.Scene);
 			container.Resolve<MyInstance>();
@@ -48,7 +48,7 @@ namespace CryoDI.Tests
 		[Test]
 		public void ExternalInExternal()
 		{
-			var container = new CryoContainer {OnLifetimeError = Reaction.ThrowException};
+			var container = new CryoContainer {LifetimeErrorReaction = Reaction.ThrowException};
 			container.RegisterSingleton<MySingleton>(LifeTime.External);
 			container.RegisterType<MyInstance>(LifeTime.External);
 			container.Resolve<MyInstance>();
@@ -59,7 +59,7 @@ namespace CryoDI.Tests
 		[Test] 
 		public void ExternalInGlobal()
 		{
-			var container = new CryoContainer {OnLifetimeError = Reaction.ThrowException};
+			var container = new CryoContainer {LifetimeErrorReaction = Reaction.ThrowException};
 			container.RegisterSingleton<MySingleton>(LifeTime.External);
 			container.RegisterType<MyInstance>(LifeTime.Global);
 			container.Resolve<MyInstance>();
@@ -70,7 +70,7 @@ namespace CryoDI.Tests
 		[Test]
 		public void ExternalInScene()
 		{
-			var container = new CryoContainer {OnLifetimeError = Reaction.ThrowException};
+			var container = new CryoContainer {LifetimeErrorReaction = Reaction.ThrowException};
 			container.RegisterSingleton<MySingleton>(LifeTime.External);
 			container.RegisterType<MyInstance>(LifeTime.Scene);
 			container.Resolve<MyInstance>();
@@ -79,7 +79,7 @@ namespace CryoDI.Tests
 		[Test]
 		public void SceneInExternal()
 		{
-			var container = new CryoContainer {OnLifetimeError = Reaction.ThrowException};
+			var container = new CryoContainer {LifetimeErrorReaction = Reaction.ThrowException};
 			container.RegisterSingleton<MySingleton>(LifeTime.Scene);
 			container.RegisterType<MyInstance>(LifeTime.External);
 			container.Resolve<MyInstance>();
@@ -88,7 +88,7 @@ namespace CryoDI.Tests
 		[Test]
 		public void SceneInGlobal()
 		{
-			var container = new CryoContainer {OnLifetimeError = Reaction.ThrowException};
+			var container = new CryoContainer {LifetimeErrorReaction = Reaction.ThrowException};
 			container.RegisterSingleton<MySingleton>(LifeTime.Scene);
 			container.RegisterType<MyInstance>(LifeTime.Global);
 
@@ -106,7 +106,7 @@ namespace CryoDI.Tests
 		[Test]
 		public void SceneInScene()
 		{
-			var container = new CryoContainer {OnLifetimeError = Reaction.ThrowException};
+			var container = new CryoContainer {LifetimeErrorReaction = Reaction.ThrowException};
 			container.RegisterSingleton<MySingleton>(LifeTime.Scene);
 			container.RegisterType<MyInstance>(LifeTime.Scene);
 			container.Resolve<MyInstance>();

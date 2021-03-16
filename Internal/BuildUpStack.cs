@@ -18,10 +18,10 @@ namespace CryoDI
 
 		public BuildUpStack()
 		{
-			OnCircularDependency = Reaction.LogError;
+			CircularDependencyReaction = Reaction.LogError;
 		}
 		
-		public Reaction OnCircularDependency { get; set; }
+		public Reaction CircularDependencyReaction { get; set; }
 
 		public void PushObject(object obj)
 		{
@@ -89,7 +89,7 @@ namespace CryoDI
 
 		private void HandleCircularDependency(int from)
 		{
-			if (OnCircularDependency == Reaction.Ignore)
+			if (CircularDependencyReaction == Reaction.Ignore)
 				return;
 			
 			var builder = new StringBuilder();
@@ -100,7 +100,7 @@ namespace CryoDI
 				builder.Append("Type: " + _stack[i].Object.GetType() + ". Property: " + _stack[i].PropertyName);
 			}
 
-			switch (OnCircularDependency)
+			switch (CircularDependencyReaction)
 			{
 			case Reaction.LogWarning:
 				DILog.LogWarning("Circular dependency found: " + builder.ToString());

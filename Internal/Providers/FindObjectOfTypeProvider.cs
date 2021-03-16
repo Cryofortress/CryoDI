@@ -11,9 +11,11 @@ namespace CryoDI.Providers
 	public class FindObjectOfTypeProvider<T> : IObjectProvider where T : Object
 	{
 		private T _cached;
+		private readonly ILifeTimeManager _lifeTimeManager;
 
-		public FindObjectOfTypeProvider(LifeTime lifeTime)
+		public FindObjectOfTypeProvider(ILifeTimeManager lifeTimeManager, LifeTime lifeTime)
 		{
+			_lifeTimeManager = lifeTimeManager;
 			LifeTime = lifeTime;
 		}
 
@@ -37,7 +39,7 @@ namespace CryoDI.Providers
 						cryoBuilder.BuildUp();
 				}
 
-				LifeTimeManager.TryToAdd(this, LifeTime);
+				_lifeTimeManager.Add(this, LifeTime);
 			}
 
 			return _cached;
@@ -54,7 +56,7 @@ namespace CryoDI.Providers
 				var cryoBehaviour = _cached as CryoBehaviour;
 				if (cryoBehaviour != null && !cryoBehaviour.BuiltUp) cryoBehaviour.BuildUp();
 
-				LifeTimeManager.TryToAdd(this, LifeTime);
+				_lifeTimeManager.Add(this, LifeTime);
 			}
 
 			return _cached;

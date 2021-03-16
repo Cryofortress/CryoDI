@@ -5,18 +5,20 @@ namespace CryoDI.Providers
 	internal class SingletonProvider<T> : IObjectProvider
 	{
 		private readonly Func<T> _factoryMethod;
+		private readonly ILifeTimeManager _lifeTimeManager;
 		private bool _exist;
 		private T _instance;
 
-		public SingletonProvider(LifeTime lifeTime)
-			: this(Activator.CreateInstance<T>, lifeTime)
+		public SingletonProvider(ILifeTimeManager lifeTimeManager, LifeTime lifeTime)
+			: this(Activator.CreateInstance<T>, lifeTimeManager, lifeTime)
 		{
 		}
 
-		public SingletonProvider(Func<T> factoryMethod, LifeTime lifeTime)
+		public SingletonProvider(Func<T> factoryMethod, ILifeTimeManager lifeTimeManager, LifeTime lifeTime)
 		{
-			LifeTime = lifeTime;
 			_factoryMethod = factoryMethod;
+			_lifeTimeManager = lifeTimeManager;
+			LifeTime = lifeTime;
 		}
 
 		public LifeTime LifeTime { get; }
@@ -29,7 +31,7 @@ namespace CryoDI.Providers
 				_exist = true;
 
 				container.BuildUp(_instance, parameters);
-				LifeTimeManager.TryToAdd(this, LifeTime);
+				_lifeTimeManager.Add(this, LifeTime);
 			}
 
 			return _instance;

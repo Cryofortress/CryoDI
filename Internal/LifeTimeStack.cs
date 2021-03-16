@@ -14,7 +14,7 @@ namespace CryoDI
 
 		public LifeTimeStack()
 		{
-			OnLifetimeError = Reaction.LogError;
+			LifetimeErrorReaction = Reaction.LogError;
 		}
 
 		public void Push(ContainerKey key, LifeTime lifetime)
@@ -35,7 +35,7 @@ namespace CryoDI
 			_stack.RemoveAt(_stack.Count - 1);
 		}
 		
-		public Reaction OnLifetimeError { get; set; }
+		public Reaction LifetimeErrorReaction { get; set; }
 
 		private void CheckLifeTime()
 		{
@@ -54,7 +54,7 @@ namespace CryoDI
 
 		private void HandleLifetimeError(string message)
 		{
-			switch (OnLifetimeError)
+			switch (LifetimeErrorReaction)
 			{
 			case Reaction.LogWarning:
 				DILog.LogWarning(message);

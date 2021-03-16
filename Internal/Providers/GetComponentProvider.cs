@@ -1,5 +1,6 @@
 #if UNITY_5_3_OR_NEWER
 
+using System;
 using UnityEngine;
 
 namespace CryoDI.Providers
@@ -7,11 +8,13 @@ namespace CryoDI.Providers
 	public class GetComponentProvider<T> : IObjectProvider where T : Component
 	{
 		private readonly FindComponentHint _hint;
+		private readonly ILifeTimeManager _lifeTimeManager;
 
-		public GetComponentProvider(FindComponentHint hint, LifeTime lifeTime)
+		public GetComponentProvider(FindComponentHint hint, ILifeTimeManager lifeTimeManager, LifeTime lifeTime)
 		{
-			LifeTime = lifeTime;
 			_hint = hint;
+			_lifeTimeManager = lifeTimeManager;
+			LifeTime = lifeTime;
 		}
 
 		public LifeTime LifeTime { get; }
@@ -32,7 +35,8 @@ namespace CryoDI.Providers
 					cryoBuilder.BuildUp();
 			}
 
-			LifeTimeManager.TryToAdd(component, LifeTime);
+			if (component is IDisposable disposable)
+				_lifeTimeManager.Add(disposable, LifeTime);
 			return component;
 		}
 
