@@ -264,6 +264,22 @@ namespace CryoDI
 
 		#endregion Instance
 
+
+		#region Alias
+
+		/// <summary>
+		/// Зарегистрировать синоним
+		/// При попытке получить ссылку на тип TBase из контейнера будет извлекаться TDerived
+		/// Удобно при использовании с синглтонами, реализующими несколько интерфейсов
+		/// </summary>
+		public static CryoContainer RegisterAlias<TBase, TDerived>(this CryoContainer container, string name = null,
+			string derivedName = null) where TDerived : TBase
+		{
+			return container.RegisterProvider<TBase>(new AliasProvider<TDerived>(derivedName), name);
+		}
+
+		#endregion Alias
+
 #if UNITY_5_3_OR_NEWER
 
 		#region SceneObject
