@@ -1,0 +1,17 @@
+{
+    "name": "CryoDI.Editor.Tests",
+    "references": [
+	"GUID:784e1d32cbcc043eb92e290bd368b3ac"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": []
+}
