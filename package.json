@@ -1,0 +1,11 @@
+{
+    "name": "com.cryofortress.cryodi",
+    "version": "1.0.3",
+    "displayName": "Cryo DI",
+    "description": "Simple and easy-to-use dependency injection container for Unity3D",
+    "unity": "2018.1",
+    "dependencies": {
+        "com.unity.test-framework": "1.1.1",
+        "com.unity.ext.nunit": "1.0.6"    
+    }
+}
