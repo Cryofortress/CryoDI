@@ -14,6 +14,8 @@ namespace CryoDI
 		private readonly Dictionary<ContainerKey, IObjectProvider> _providers =
 			new Dictionary<ContainerKey, IObjectProvider>();
 
+		private readonly CryoContainer _parentContainer;
+
 		private readonly BuildUpStack _buildUpStack = new BuildUpStack();
 		private readonly LifeTimeStack _lifetimeStack = new LifeTimeStack();
 		private readonly LifeTimeManager _lifeTimeManager = new LifeTimeManager();
@@ -33,6 +35,15 @@ namespace CryoDI
 		public ILifeTimeManager LifeTimeManager
 		{
 			get { return _lifeTimeManager; }
+		}
+
+		public CryoContainer()
+		{
+		}
+
+		public CryoContainer(CryoContainer parentContainer)
+		{
+			_parentContainer = parentContainer;
 		}
 
 		public void Dispose()
@@ -118,15 +129,23 @@ namespace CryoDI
 		public virtual object TryResolveByName(Type type, string name, params object[] parameters)
 		{
 			IObjectProvider provider = ResolveProvider(type, name, out var key);
-			if (provider == null)
-				return null;
+			if (provider != null)
+			{
+				_lifetimeStack.Push(key, provider.LifeTime);
+				var obj = provider.WeakGetObject(this, parameters);
+				if (obj != null)
+					_buildUpStack.CheckCircularDependency(obj);
+				_lifetimeStack.Pop();
+				return obj;
+			}
 
-			_lifetimeStack.Push(key, provider.LifeTime);
-			var obj = provider.WeakGetObject(this, parameters);
-			if (obj != null)
-				_buildUpStack.CheckCircularDependency(obj);
-			_lifetimeStack.Pop();
-			return obj;
+			if (_parentContainer != null)
+			{
+				var ret = _parentContainer.TryResolveByName(type, name, parameters);
+				if (ret != null) return ret;
+			}
+
+			return null;
 		}
 
 		/// <summary>
@@ -355,15 +374,20 @@ namespace CryoDI
 		{
 			ContainerKey key;
 			IObjectProvider provider = ResolveProvider(type, name, out key);
-			if (provider == null)
-				throw new ContainerException("Can't resolve type " + type.FullName +
-				                             (name == null ? "" : " registered with name \"" + name + "\""));
+			if (provider != null)
+			{
+				_lifetimeStack.Push(key, provider.LifeTime);
+				var obj = provider.GetObject(owner, this, parameters);
+				_buildUpStack.CheckCircularDependency(obj);
+				_lifetimeStack.Pop();
+				return obj;
+			}
 
-			_lifetimeStack.Push(key, provider.LifeTime);
-			var obj = provider.GetObject(owner, this, parameters);
-			_buildUpStack.CheckCircularDependency(obj);
-			_lifetimeStack.Pop();
-			return obj;
+			if (_parentContainer != null)
+				return _parentContainer.ResolveByNameFor(owner, type, name, parameters);
+
+			throw new ContainerException("Can't resolve type " + type.FullName +
+			                             (name == null ? "" : " registered with name \"" + name + "\""));
 		}
 
 		private IObjectProvider ResolveProvider(Type type, string name, out ContainerKey key)
