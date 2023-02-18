@@ -28,7 +28,6 @@
 
 		public bool CanResolveByName(string name)
 		{
-			_container.IsRegistered<T>();
 			return _container.IsRegistered<T>(name);
 		}
 	}

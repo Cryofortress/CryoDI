@@ -14,6 +14,8 @@ namespace CryoDI
 		private readonly Dictionary<ContainerKey, IObjectProvider> _providers =
 			new Dictionary<ContainerKey, IObjectProvider>();
 
+		private readonly List<IFactory> _factories = new List<IFactory>();
+
 		private readonly CryoContainer _parentContainer;
 
 		private readonly BuildUpStack _buildUpStack = new BuildUpStack();
@@ -39,9 +41,17 @@ namespace CryoDI
 
 		public CryoContainer()
 		{
+			RegisterFactory(new BuilderFactory());
+			RegisterFactory(new ResolverFactory());
+			RegisterFactory(new WeakResolverFactory());
+			
+#if UNITY_5_3_OR_NEWER
+			RegisterFactory(new PrefabInstantiatorFactory());
+#endif
+
 		}
 
-		public CryoContainer(CryoContainer parentContainer)
+		public CryoContainer(CryoContainer parentContainer) : this()
 		{
 			_parentContainer = parentContainer;
 		}
@@ -59,12 +69,20 @@ namespace CryoDI
 			return this;
 		}
 
+		public CryoContainer RegisterFactory(IFactory factory)
+		{
+			_factories.Add(factory);
+			return this;
+		}
+
 		/// <summary>
 		/// Проверить, зарегистрирован ли обьект в контейнере
 		/// </summary>
 		public virtual bool IsRegistered<T>(string name = null)
 		{
-			return (ResolveProvider(typeof(T), name) != null);
+			if (ResolveProvider(typeof(T), name, out _) != null)
+				return true;
+			return _factories.Any(f => f.CanCreate(typeof(T), name));
 		}
 
 		/// <summary>
@@ -133,6 +151,17 @@ namespace CryoDI
 			{
 				_lifetimeStack.Push(key, provider.LifeTime);
 				var obj = provider.WeakGetObject(this, parameters);
+				if (obj != null)
+					_buildUpStack.CheckCircularDependency(obj);
+				_lifetimeStack.Pop();
+				return obj;
+			}
+
+			var factory = _factories.FirstOrDefault(f => f.CanCreate(type, name));
+			if (factory != null)
+			{
+				_lifetimeStack.Push(key, factory.LifeTime);
+				var obj = factory.Create(type, name, this);
 				if (obj != null)
 					_buildUpStack.CheckCircularDependency(obj);
 				_lifetimeStack.Pop();
@@ -288,29 +317,7 @@ namespace CryoDI
 
 			try
 			{
-				var propertyType = propertyInfo.PropertyType;
-
-				if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(IResolver<>))
-				{
-					valueObj = CreateResolver(propertyType, attribName);
-				}
-				else if (propertyType.IsGenericType &&
-				         propertyType.GetGenericTypeDefinition() == typeof(IWeakResolver<>))
-				{
-					valueObj = CreateWeakResolver(propertyType, attribName);
-				}
-				else if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(IBuilder<>))
-				{
-					valueObj = CreateBuilder(propertyType);
-				}
-#if UNITY_5_3_OR_NEWER
-				else if (propertyType == typeof(IPrefabInstantiator))
-				{
-					valueObj = CreatePrefabInstantiator();
-				}
-#endif
-				else
-					valueObj = ResolveByNameFor(obj, propertyType, attribName);
+				valueObj = ResolveByNameFor(obj, propertyInfo.PropertyType, attribName);
 			}
 			catch (CircularDependencyException)
 			{
@@ -341,44 +348,26 @@ namespace CryoDI
 		protected virtual void PostBuildUp(object obj)
 		{
 		}
-
-		private object CreateResolver(Type propertyType, string name)
-		{
-			var args = propertyType.GetGenericArguments();
-			var resolverType = typeof(Resolver<>).MakeGenericType(args);
-			return Activator.CreateInstance(resolverType, name, this);
-		}
-
-		private object CreateWeakResolver(Type propertyType, string name)
-		{
-			var args = propertyType.GetGenericArguments();
-			var resolverType = typeof(WeakResolver<>).MakeGenericType(args);
-			return Activator.CreateInstance(resolverType, name, this);
-		}
-
-		private object CreateBuilder(Type propertyType)
-		{
-			var args = propertyType.GetGenericArguments();
-			var resolverType = typeof(Builder<>).MakeGenericType(args);
-			return Activator.CreateInstance(resolverType, this);
-		}
-
-#if UNITY_5_3_OR_NEWER
-		private object CreatePrefabInstantiator()
-		{
-			return new PrefabInstantiator(this);
-		}
-#endif
-
+		
 		private object ResolveByNameFor(object owner, Type type, string name, params object[] parameters)
 		{
-			ContainerKey key;
-			IObjectProvider provider = ResolveProvider(type, name, out key);
+			IObjectProvider provider = ResolveProvider(type, name, out var key);
 			if (provider != null)
 			{
 				_lifetimeStack.Push(key, provider.LifeTime);
 				var obj = provider.GetObject(owner, this, parameters);
 				_buildUpStack.CheckCircularDependency(obj);
+				_lifetimeStack.Pop();
+				return obj;
+			}
+			
+			var factory = _factories.FirstOrDefault(f => f.CanCreate(type, name));
+			if (factory != null)
+			{
+				_lifetimeStack.Push(key, factory.LifeTime);
+				var obj = factory.Create(type, name, this);
+				if (obj != null)
+					_buildUpStack.CheckCircularDependency(obj);
 				_lifetimeStack.Pop();
 				return obj;
 			}
@@ -396,12 +385,6 @@ namespace CryoDI
 			IObjectProvider provider = null;
 			_providers.TryGetValue(key, out provider);
 			return provider;
-		}
-
-		private IObjectProvider ResolveProvider(Type type, string name)
-		{
-			ContainerKey key;
-			return ResolveProvider(type, name, out key);
 		}
 	}
 }
