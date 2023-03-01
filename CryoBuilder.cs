@@ -3,46 +3,17 @@ using UnityEngine;
 
 namespace CryoDI
 {
-	public sealed class CryoBuilder : MonoBehaviour
+	public sealed class CryoBuilder : CryoBehaviour
 	{
-		private static CryoContainer _rootContainer;
-
-		public bool BuiltUp { get; private set; }
-
-		private void Awake()
+		protected override void BuildUp(CryoContainer container)
 		{
-			BuildUp();
-		}
-
-		public void BuildUp()
-		{
-			if (!BuiltUp)
+			var monoBehaviours = GetComponents<MonoBehaviour>();
+			foreach (var monoBehaviour in monoBehaviours)
 			{
-				BuiltUp = true;
-				EnsureContainerExists();
-				var monoBehaviours = GetComponents<MonoBehaviour>();
-				foreach (var monoBehaviour in monoBehaviours)
-				{
-					if (monoBehaviour is CryoBehaviour)
-						continue;
-					_rootContainer.BuildUp(monoBehaviour);
-				}
-
-				_rootContainer.BuildUp(this);
+				if (monoBehaviour is CryoBehaviour)
+					continue;
+				container.BuildUp(monoBehaviour);
 			}
-		}
-
-		private static void EnsureContainerExists()
-		{
-			if (_rootContainer == null)
-				((IInternalContainerBuidler) UnityStarter.Instance).CreateRootContainer();
-		}
-
-		public static void SetRootContainer(CryoContainer container)
-		{
-			if (_rootContainer != null)
-				throw new ContainerException("Root container already set");
-			_rootContainer = container;
 		}
 	}
 }

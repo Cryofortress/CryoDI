@@ -20,8 +20,13 @@ namespace CryoDI
 			{
 				BuiltUp = true;
 				EnsureContainerExists();
-				_rootContainer.BuildUp(this);
+				BuildUp(_rootContainer);
 			}
+		}
+
+		protected virtual void BuildUp(CryoContainer container)
+		{
+			container.BuildUp(this);
 		}
 
 		private static void EnsureContainerExists()
